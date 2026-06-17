@@ -140,24 +140,29 @@ if('serviceWorker' in navigator){
 function isRunningStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
+function getDeviceType(){
+  const ua = navigator.userAgent;
+  if(/iPhone|iPad|iPod/.test(ua)) return 'ios';
+  if(/Android/.test(ua)) return 'android';
+  return null;
+}
 function showInstallBannerIfNeeded(){
   if(isRunningStandalone()) return; // すでにアプリとして開いている場合は表示しない
   if(localStorage.getItem('kpics_install_banner_dismissed')==='1') return;
-
-  const ua = navigator.userAgent;
-  const isIOS = /iPhone|iPad|iPod/.test(ua);
-  const isAndroid = /Android/.test(ua);
-  if(!isIOS && !isAndroid) return; // パソコンでは表示しない
-
-  const descEl = document.getElementById('install-banner-desc');
-  if(isIOS){
-    descEl.textContent = '共有ボタン（□に↑）をタップ →「ホーム画面に追加」を選んでください';
-  } else {
-    descEl.textContent = '右上の「︙」メニューをタップ →「アプリをインストール」または「ホーム画面に追加」を選んでください';
-  }
+  if(!getDeviceType()) return; // パソコンでは表示しない
   document.getElementById('install-banner').style.display = 'flex';
 }
 function dismissInstallBanner(){
   document.getElementById('install-banner').style.display = 'none';
   localStorage.setItem('kpics_install_banner_dismissed', '1');
+}
+function openInstallGuide(){
+  const device = getDeviceType() || 'ios';
+  document.getElementById('guide-overlay-'+device).classList.add('open');
+}
+function closeGuide(id){
+  document.getElementById(id).classList.remove('open');
+}
+function closeGuideOnOverlay(ev, id){
+  if(ev.target.id===id) closeGuide(id);
 }
