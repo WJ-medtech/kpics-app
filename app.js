@@ -117,6 +117,7 @@ _supabase.auth.onAuthStateChange(async (event, session) => {
 
     document.getElementById('home-screen').classList.add('active');
     hideSplash();
+    showInstallBannerIfNeeded();
   } else {
     window.CURRENT_UID = null;
     document.getElementById('home-screen').classList.remove('active');
@@ -127,3 +128,36 @@ _supabase.auth.onAuthStateChange(async (event, session) => {
 
 // 万一 Supabase からの応答が遅れた場合の保険（最大3秒でスプラッシュを閉じる）
 setTimeout(hideSplash, 3000);
+
+// ---------- PWA: ホーム画面に追加した時に正しく動くようにする ----------
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+
+// ---------- ホーム画面に追加の案内バナー ----------
+function isRunningStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function showInstallBannerIfNeeded(){
+  if(isRunningStandalone()) return; // すでにアプリとして開いている場合は表示しない
+  if(localStorage.getItem('kpics_install_banner_dismissed')==='1') return;
+
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  if(!isIOS && !isAndroid) return; // パソコンでは表示しない
+
+  const descEl = document.getElementById('install-banner-desc');
+  if(isIOS){
+    descEl.textContent = '共有ボタン（□に↑）をタップ →「ホーム画面に追加」を選んでください';
+  } else {
+    descEl.textContent = '右上の「︙」メニューをタップ →「アプリをインストール」または「ホーム画面に追加」を選んでください';
+  }
+  document.getElementById('install-banner').style.display = 'flex';
+}
+function dismissInstallBanner(){
+  document.getElementById('install-banner').style.display = 'none';
+  localStorage.setItem('kpics_install_banner_dismissed', '1');
+}

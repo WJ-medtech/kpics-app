@@ -4,7 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>イベントカレンダー | K-PICS</title>
-<link rel="icon" href="assets/logo-icon.png">
+
+<!-- ホーム画面に追加した時の設定（PWA） -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0C0C0C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="K-PICS">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" href="assets/icons/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -202,7 +212,7 @@ button{font-family:inherit;}
 </head>
 <body>
 
-<div id="splash"><img class="splash-logo-img" src="assets/logo-icon.png" alt="K-PICS"></div>
+<div id="splash"><img class="splash-logo-img" src="assets/logo-icon-dark.png" alt="K-PICS"></div>
 
 <header class="top-header">
   <div class="top-inner">
@@ -211,7 +221,7 @@ button{font-family:inherit;}
       ホーム
     </a>
     <div class="top-title">イベントカレンダー</div>
-    <img class="top-logo" src="assets/logo-icon.png" alt="K-PICS">
+    <img class="top-logo" src="assets/logo-icon-dark.png" alt="K-PICS">
   </div>
 </header>
 
