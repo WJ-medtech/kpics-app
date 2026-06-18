@@ -257,6 +257,16 @@ button{font-family:inherit;}
 
 .subgroup{margin-left:14px;margin-top:8px;padding-left:14px;border-left:2px solid var(--border);display:flex;flex-direction:column;gap:8px;}
 
+.menu-card.add-card{
+  border-style:dashed;border-color:var(--border-light);background:transparent;
+}
+.menu-card.add-card:hover{background:var(--orange-bg);border-color:var(--orange);}
+.menu-card.add-card .menu-icon{
+  background:transparent;border:1px dashed var(--border-light);color:var(--text-muted);font-size:20px;font-weight:700;
+}
+.menu-card.add-card:hover .menu-icon{border-color:var(--orange);color:var(--orange);}
+.menu-card.add-card .menu-desc{color:var(--text-dim);}
+
 .footer-note{
   text-align:center;font-size:11px;color:var(--text-dim);margin-top:40px;line-height:1.8;
 }
@@ -277,8 +287,57 @@ button{font-family:inherit;}
   padding:2px 4px;flex-shrink:0;
 }
 
-/* インストール手順モーダル */
-.guide-overlay{
+/* ===== 自主練 注意事項モーダル ===== */
+.guide-modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:700;
+  align-items:flex-end;justify-content:center;
+}
+.guide-modal-overlay.open{display:flex;}
+@media (min-width:560px){ .guide-modal-overlay{align-items:center;padding:20px;} }
+.guide-modal-box{
+  background:var(--dark);border:1px solid var(--border);border-radius:18px 18px 0 0;
+  width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;
+  animation:fadeUp .3s cubic-bezier(.16,1,.3,1) both;
+}
+@media (min-width:560px){ .guide-modal-box{border-radius:16px;} }
+.guide-modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.guide-modal-title{font-family:"Bebas Neue",sans-serif;font-size:19px;letter-spacing:.04em;}
+.guide-modal-close{
+  width:30px;height:30px;border-radius:8px;background:var(--card);border:1px solid var(--border);
+  color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex-shrink:0;
+}
+.guide-modal-body{padding:20px 20px 28px;overflow-y:auto;}
+.gm-lead{font-size:12.5px;color:var(--text-muted);line-height:1.85;margin-bottom:22px;}
+.gm-section{margin-bottom:20px;}
+.gm-section-title{
+  display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--orange);
+  margin-bottom:10px;
+}
+.gm-section-title .gm-icon{
+  width:24px;height:24px;border-radius:7px;background:var(--orange-bg);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+.gm-list{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px 14px;}
+.gm-list-item{font-size:12.5px;line-height:1.7;color:var(--text);padding-left:14px;position:relative;}
+.gm-list-item::before{content:"";position:absolute;left:0;top:9px;width:4px;height:4px;border-radius:50%;background:var(--orange);}
+.gm-note{
+  margin-top:24px;font-size:12px;color:var(--text-muted);line-height:1.85;
+  background:var(--orange-bg);border:1px solid rgba(232,160,32,.25);border-radius:10px;padding:14px 15px;
+}
+.gm-note strong{color:var(--orange);}
+.gm-link{color:var(--orange);text-decoration:underline;word-break:break-all;}
+.gm-closing{margin-top:20px;font-size:12.5px;color:var(--text-muted);line-height:1.85;text-align:center;}
+.gm-ack-btn{
+  width:100%;margin-top:22px;padding:14px;
+  font-family:"Bebas Neue",sans-serif;font-size:16px;letter-spacing:.06em;
+  border:none;border-radius:9px;cursor:pointer;background:var(--orange);color:var(--black);transition:all .2s;
+}
+.gm-ack-btn:hover{background:var(--orange-light);transform:translateY(-1px);}
+
+
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:600;
   align-items:flex-end;justify-content:center;
 }
@@ -463,9 +522,32 @@ button{font-family:inherit;}
 .back-footer{
   text-align:center;font-size:11px;color:var(--text-dim);margin-top:46px;line-height:1.8;
 }
+
+/* ===================== 下部タブバー ===================== */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:300;
+  background:rgba(20,20,20,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:stretch;justify-content:space-around;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.tabbar-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:9px 4px 8px;color:var(--text-dim);text-decoration:none;cursor:pointer;
+  transition:color .15s;-webkit-tap-highlight-color:transparent;background:none;border:none;font-family:inherit;
+}
+.tabbar-item svg{width:21px;height:21px;}
+.tabbar-item .tb-label{font-size:10px;font-weight:700;letter-spacing:.02em;}
+.tabbar-item.active{color:var(--orange);}
+.tabbar-item:active{opacity:.7;}
+
+/* タブバーがある画面では、本文の下に余白を確保してコンテンツが隠れないようにする */
+body.has-tabbar .home-main{padding-bottom:calc(86px + env(safe-area-inset-bottom));}
+body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom));}
+
 </style>
 </head>
-<body>
+<body class="has-tabbar">
 
 <!-- ===== SPLASH ===== -->
 <div id="splash">
@@ -566,8 +648,17 @@ button{font-family:inherit;}
             <button class="install-banner-close" onclick="event.stopPropagation(); dismissInstallBanner()" aria-label="閉じる">✕</button>
           </div>
 
-          <div class="sec-label">手技を学ぶ</div>
+          <div class="sec-label">はじめに</div>
           <div class="menu-group">
+            <div class="menu-card" onclick="openGuideModal()" role="button" tabindex="0">
+              <div class="menu-icon solid">📋</div>
+              <div class="menu-body">
+                <div class="menu-title">K-PICSの部員として</div>
+                <div class="menu-desc">自主練を始める前に必ず読んでください</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+
             <div class="menu-card disabled">
               <div class="menu-icon">🩺</div>
               <div class="menu-body">
@@ -575,10 +666,7 @@ button{font-family:inherit;}
                 <div class="menu-desc">エコー手技をひとつひとつ習得していくコンテンツ</div>
               </div>
             </div>
-          </div>
 
-          <div class="sec-label">認定試験</div>
-          <div class="menu-group">
             <a class="menu-card primary" href="https://wj-medtech.github.io/requirements/" target="_blank" rel="noopener">
               <div class="menu-icon solid">🏆</div>
               <div class="menu-body">
@@ -589,16 +677,88 @@ button{font-family:inherit;}
             </a>
           </div>
 
-          <div class="sec-label">予定を確認する</div>
+          <div class="sec-label">手技練習に</div>
           <div class="menu-group">
-            <a class="menu-card" href="calendar.html">
-              <div class="menu-icon">🗓️</div>
+            <a class="menu-card" href="https://wj-medtech.github.io/-/" target="_blank" rel="noopener">
+              <div class="menu-icon">🎯</div>
               <div class="menu-body">
-                <div class="menu-title">イベント日程を確認する</div>
-                <div class="menu-desc">部員なら誰でも追加・編集できるカレンダー</div>
+                <div class="menu-title">絵合わせアプリ</div>
+                <div class="menu-desc">超音波画像を再現してタイムを測る練習ツール</div>
               </div>
               <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
+          </div>
+
+          <div class="sec-label">超音波について詳しくなろう</div>
+          <div class="menu-group">
+            <a class="menu-card" href="https://wj-medtech.github.io/pocus-loop/" target="_blank" rel="noopener">
+              <div class="menu-icon">⚙️</div>
+              <div class="menu-body">
+                <div class="menu-title">POCUS-LOOP</div>
+                <div class="menu-desc">超音波の原理・各モードを学ぶ</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="menu-card" href="https://www.medical.canon/jp/lecture/index.html" target="_blank" rel="noopener">
+              <div class="menu-icon">🏥</div>
+              <div class="menu-body">
+                <div class="menu-title">キャノン超音波講座</div>
+                <div class="menu-desc">キャノンメディカルによる教育コンテンツ</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="menu-card" href="https://www.jsum.or.jp/ulpath/" target="_blank" rel="noopener">
+              <div class="menu-icon">📖</div>
+              <div class="menu-body">
+                <div class="menu-title">JSUM Ultrasound Path</div>
+                <div class="menu-desc">日本超音波医学会のeラーニング</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+
+          <div class="sec-label">POCUSを臨床で活かそう</div>
+          <div class="menu-group">
+            <div class="menu-card disabled">
+              <div class="menu-icon">🚑</div>
+              <div class="menu-body">
+                <div class="menu-title">POCUS特化メディカルラリー <span class="badge-soon">検討中</span></div>
+                <div class="menu-desc">SP演技台本・評価項目のストック</div>
+              </div>
+            </div>
+            <div class="menu-card disabled">
+              <div class="menu-icon">🧠</div>
+              <div class="menu-body">
+                <div class="menu-title">POCUS特化臨床推論 <span class="badge-soon">検討中</span></div>
+                <div class="menu-desc">勉強会の開催案内・過去の良問ストック</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-label">その他</div>
+          <div class="menu-group">
+            <a class="menu-card" href="https://wj-medtech.github.io/fast_journey/" target="_blank" rel="noopener">
+              <div class="menu-icon">🧭</div>
+              <div class="menu-body">
+                <div class="menu-title">FAST Journey</div>
+                <div class="menu-desc">FASTの基本を習得する初学者向けアプリ</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <div class="menu-card disabled">
+              <div class="menu-icon">🧬</div>
+              <div class="menu-body">
+                <div class="menu-title">解剖VR <span class="badge-soon">未定</span></div>
+                <div class="menu-desc">構想段階のコンテンツです</div>
+              </div>
+            </div>
+            <div class="menu-card add-card" onclick="alert('この機能は近日対応予定です')" role="button" tabindex="0">
+              <div class="menu-icon">＋</div>
+              <div class="menu-body">
+                <div class="menu-title">項目を追加する</div>
+                <div class="menu-desc">部員が自由にリンクを追加できます</div>
+              </div>
+            </div>
           </div>
 
           <div class="footer-note">
@@ -781,6 +941,45 @@ button{font-family:inherit;}
             </div>
           </div>
 
+          <!-- 05 臨床知識 -->
+          <div class="back-section reveal">
+            <div class="back-eyebrow">05 · Knowledge for Juniors</div>
+            <div class="back-h2">低学年向け 疾患リスト</div>
+
+            <div class="portal-card disabled">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">📋</div>
+                <div class="portal-card-title">POCUSでよく扱う疾患リスト <span class="portal-card-tag muted">構想中</span></div>
+              </div>
+              <div class="portal-card-desc">POCUSで頻繁に扱う疾患の理解を深めるためのページ。低学年がまず押さえておきたい疾患を整理していく予定です。</div>
+            </div>
+          </div>
+
+          <!-- 06 その他コンテンツ -->
+          <div class="back-section reveal">
+            <div class="back-eyebrow">06 · More</div>
+            <div class="back-h2">その他のコンテンツ</div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🧭</div>
+                <div class="portal-card-title">FAST Journey</div>
+              </div>
+              <div class="portal-card-desc">完全初学者がFASTの基本を習得できるようになることを目標に作成したアプリ。</div>
+              <a class="portal-card-link" href="https://wj-medtech.github.io/fast_journey/" target="_blank" rel="noopener">FAST Journeyへ
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+
+            <div class="portal-card disabled">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🧬</div>
+                <div class="portal-card-title">解剖VR <span class="portal-card-tag muted">未定</span></div>
+              </div>
+              <div class="portal-card-desc">構想段階のコンテンツです。詳細は未定です。</div>
+            </div>
+          </div>
+
           <div class="back-footer">
             <img src="assets/logo-icon-dark.png" alt="" style="height:16px;width:auto;display:inline-block;vertical-align:middle;opacity:.5;margin-right:5px;">
             © 2026 K-PICS 部員専用ポータル
@@ -788,6 +987,107 @@ button{font-family:inherit;}
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- 下部タブバー -->
+<nav class="tabbar" id="main-tabbar">
+  <a class="tabbar-item" data-tab="home" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+    <span class="tb-label">ホーム</span>
+  </a>
+  <a class="tabbar-item" data-tab="calendar" href="calendar.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <span class="tb-label">カレンダー</span>
+  </a>
+  <a class="tabbar-item" data-tab="documents" href="documents.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+    <span class="tb-label">資料</span>
+  </a>
+  <a class="tabbar-item" data-tab="questions" href="questions.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+    <span class="tb-label">質問</span>
+  </a>
+</nav>
+
+<!-- K-PICSの部員として：自主練注意事項モーダル -->
+<div class="guide-modal-overlay" id="guide-modal-overlay" onclick="closeGuideModalOnOverlay(event)">
+  <div class="guide-modal-box">
+    <div class="guide-modal-head">
+      <div class="guide-modal-title">自主練に関する注意事項</div>
+      <button class="guide-modal-close" onclick="closeGuideModal()" aria-label="閉じる">✕</button>
+    </div>
+    <div class="guide-modal-body">
+      <div class="gm-lead">
+        皆さんに、エコー機器の取り扱いと自主練実施時の注意事項についてお知らせします。<br><br>
+        K-PICSで使用しているエコー機器は、もともと大学の備品ではなく、蒸野先生のご協力のもと、開業医の先生方や院内の各診療科から譲り受けた貴重な機器です。購入当時は非常に高額な医療機器であり、皆さんの学習のためにご厚意で提供していただいています。<br><br>
+        今後も長く活動を継続していくため、以下の点を必ず守って使用してください。
+      </div>
+
+      <div class="gm-section">
+        <div class="gm-section-title"><span class="gm-icon">🚪</span>地域医療支援センターへの入室について</div>
+        <div class="gm-list">
+          <div class="gm-list-item">県民枠・地域医療枠の学生と一緒に入室してください</div>
+          <div class="gm-list-item">扉前のインターホンは使用しないでください</div>
+        </div>
+      </div>
+
+      <div class="gm-section">
+        <div class="gm-section-title"><span class="gm-icon">🛏️</span>実施環境について</div>
+        <div class="gm-list">
+          <div class="gm-list-item">被験者のプライバシー保護のため、パーテーションで区切って実施してください</div>
+          <div class="gm-list-item">ベッドにゼリーが付着しないよう、ペーパー等を敷いてください。ついてしまった場合は、速やかに拭き取ってください</div>
+        </div>
+      </div>
+
+      <div class="gm-section">
+        <div class="gm-section-title"><span class="gm-icon">🔌</span>機器の取り扱いについて</div>
+        <div class="gm-list">
+          <div class="gm-list-item">エコー本体を移動させる際は、電源コードやプローブケーブルを車輪で踏まないよう注意してください。断線の原因となります</div>
+          <div class="gm-list-item">コード類は持ち上げるか、引っ掛けて床につかないようにしてください</div>
+          <div class="gm-list-item">プローブは非常に高価で繊細な機器です。落下させないよう丁寧に扱い、ベッドや机の端に放置しないでください</div>
+          <div class="gm-list-item">万が一、落下や破損などのトラブルが発生した場合は、速やかに報告してください</div>
+        </div>
+      </div>
+
+      <div class="gm-section">
+        <div class="gm-section-title"><span class="gm-icon">🧹</span>使用後の片付けについて</div>
+        <div class="gm-list">
+          <div class="gm-list-item">プローブに付着したゼリーは必ず拭き取ってください</div>
+          <div class="gm-list-item">ベッド、エコー本体、ゼリー、パーテーション、拭き取りペーパー等は、使用後に元の場所へ戻してください</div>
+        </div>
+      </div>
+
+      <div class="gm-section">
+        <div class="gm-section-title"><span class="gm-icon">🧴</span>プローブの消毒について</div>
+        <div class="gm-lead" style="margin-bottom:14px;">
+          以前はアルコールによる消毒はプローブ劣化の原因となるため最小限とされていましたが、近年は各メーカーともアルコール消毒に対応する機種が増えています。
+        </div>
+        <div class="gm-list" style="margin-bottom:10px;">
+          <div class="gm-list-item" style="font-weight:700;padding-left:0;">健常者同士で行う自主練の場合</div>
+          <div class="gm-list-item">① 検査終了後にガーゼ等でゼリーを拭き取る</div>
+          <div class="gm-list-item">② 練習終了後にアルコールを含ませたガーゼやウェットティッシュで清拭する</div>
+        </div>
+        <div class="gm-list">
+          <div class="gm-list-item" style="font-weight:700;padding-left:0;">臨床実習中・患者さんへの検査の場合</div>
+          <div class="gm-list-item">標準予防策に従い、患者さんごとにアルコール消毒を行うことが望ましいです</div>
+        </div>
+      </div>
+
+      <div class="gm-note">
+        各メーカーの推奨する消毒方法については、以下をご参照ください。<br>
+        <a class="gm-link" href="https://www.jsum.or.jp/members/about/souchitoriatsukai/" target="_blank" rel="noopener">https://www.jsum.or.jp/members/about/souchitoriatsukai/</a>
+      </div>
+
+      <div class="gm-closing">
+        機器を大切に扱うことはもちろんですが、練習に協力してくださる方々や、患者さんへの配慮も忘れないようにしてください。<br><br>
+        特に臨床実習で患者さんにエコーを実施させていただく際には、技術だけでなく、相手への思いやりや礼節も意識して行動していただければと思います。<br><br>
+        K-PICSは、エコー技術だけでなく医療者としての姿勢も学べる場となることを目指しています。<br><br>
+        よろしくお願いいたします。
+      </div>
+
+      <button class="gm-ack-btn" onclick="closeGuideModal()">読みました</button>
     </div>
   </div>
 </div>
@@ -867,7 +1167,19 @@ button{font-family:inherit;}
 </div>
 
 <script src="app.js"></script>
+<script src="tabbar.js"></script>
 <script>
+// ===================== K-PICSの部員として：自主練注意事項モーダル =====================
+function openGuideModal(){
+  document.getElementById('guide-modal-overlay').classList.add('open');
+}
+function closeGuideModal(){
+  document.getElementById('guide-modal-overlay').classList.remove('open');
+}
+function closeGuideModalOnOverlay(e){
+  if(e.target.id === 'guide-modal-overlay') closeGuideModal();
+}
+
 // ===================== 表⇄裏 フリップ制御 =====================
 let _isFlipped = false;
 function toggleFlip(){
