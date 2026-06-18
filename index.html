@@ -184,20 +184,23 @@ button{font-family:inherit;}
 .brand-mark span{font-family:"Bebas Neue",sans-serif;font-size:17px;letter-spacing:.05em;color:var(--text);}
 .logout-btn{
   background:transparent;border:1px solid var(--border-light);color:var(--text-muted);
-  font-size:10px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:all .15s;
+  font-size:10px;cursor:pointer;transition:all .15s;
   white-space:nowrap;flex-shrink:0;
+  padding:0;width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
 }
 .logout-btn:hover{border-color:var(--orange);color:var(--orange);}
-.logout-btn-icon{display:none;}
+.logout-btn-icon{display:block;width:15px;height:15px;}
+.logout-btn-text{display:none;}
 
-/* スマホ幅では「ログアウト」の文字を省略してアイコンだけにする（反転ボタンと重ならないように） */
-@media (max-width:430px){
-  .logout-btn-text{display:none;}
-  .logout-btn-icon{display:block;width:14px;height:14px;}
+/* PCなど横幅に余裕がある画面だけ「ログアウト」の文字も併記する */
+@media (min-width:640px){
   .logout-btn{
-    padding:0;width:30px;height:30px;
-    display:flex;align-items:center;justify-content:center;
+    padding:7px 13px;width:auto;height:auto;border-radius:6px;
+    gap:6px;font-size:11px;
   }
+  .logout-btn-text{display:inline;}
+  .logout-btn-icon{width:13px;height:13px;}
 }
 
 .greet{max-width:640px;margin:26px auto 0;display:flex;align-items:center;gap:14px;}
@@ -342,6 +345,37 @@ button{font-family:inherit;}
 
 .back-section{margin-bottom:52px;}
 .back-section:last-child{margin-bottom:0;}
+
+/* ===== スクロールリビール演出 ===== */
+.reveal{
+  opacity:0;transform:translateY(28px);
+  transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
+}
+.reveal.in-view{opacity:1;transform:translateY(0);}
+
+.back-hero-anim{opacity:0;transform:translateY(16px) scale(.97);}
+.back-hero-anim.in-view{
+  opacity:1;transform:translateY(0) scale(1);
+  transition:opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1);
+}
+
+.scroll-hint{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  margin-top:34px;opacity:.55;
+}
+.scroll-hint-label{
+  font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.22em;
+  color:var(--text-muted);
+}
+.scroll-hint-line{
+  width:1px;height:26px;background:linear-gradient(to bottom, var(--orange), transparent);
+  animation:scrollHintMove 1.6s ease-in-out infinite;
+}
+@keyframes scrollHintMove{
+  0%{transform:scaleY(.4);opacity:.3;}
+  50%{transform:scaleY(1);opacity:1;}
+  100%{transform:scaleY(.4);opacity:.3;}
+}
 
 .back-eyebrow{
   font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.12em;
@@ -576,16 +610,22 @@ button{font-family:inherit;}
       <!-- ============ 裏面：ポータル（読み物） ============ -->
       <div class="flip-face flip-face-back">
         <div class="back-hero">
-          <img class="back-hero-logo" src="assets/logo-icon-dark.png" alt="K-PICS">
-          <div class="back-hero-eyebrow">K - P I C S 　部員専用ポータル</div>
-          <div class="back-hero-title">学びを、<span class="accent">次の代へ。</span></div>
-          <div class="back-hero-sub">認定試験・エコー手技・勉強会・競技練習など<br>K-PICSの学習リソースへアクセスしよう</div>
+          <div class="back-hero-anim" id="back-hero-anim">
+            <img class="back-hero-logo" src="assets/logo-icon-dark.png" alt="K-PICS">
+            <div class="back-hero-eyebrow">K - P I C S 　部員専用ポータル</div>
+            <div class="back-hero-title">学びを、<span class="accent">次の代へ。</span></div>
+            <div class="back-hero-sub">認定試験・エコー手技・勉強会・競技練習など<br>K-PICSの学習リソースへアクセスしよう</div>
+            <div class="scroll-hint">
+              <span class="scroll-hint-label">SCROLL</span>
+              <span class="scroll-hint-line"></span>
+            </div>
+          </div>
         </div>
 
         <div class="back-main">
 
           <!-- このポータルの目的 -->
-          <div class="back-section">
+          <div class="back-section reveal">
             <div class="back-eyebrow">このポータルの目的</div>
             <div class="back-h2">学びを<span style="color:var(--orange);">次の代へ</span>と引き継いでいく</div>
             <div class="portal-card-desc" style="margin-bottom:4px;">先輩が積み上げてきた知識・技術・経験を、このポータルに集約し、次の世代へ確実につなぐ。K-PICSは「やってみた人が教える」学生主体の教育循環システムを目指している。</div>
@@ -622,7 +662,7 @@ button{font-family:inherit;}
           </div>
 
           <!-- 01 認定試験制度 -->
-          <div class="back-section">
+          <div class="back-section reveal">
             <div class="back-eyebrow">01 · Certification</div>
             <div class="back-h2">認定試験制度</div>
 
@@ -648,7 +688,7 @@ button{font-family:inherit;}
           </div>
 
           <!-- 02 手技・練習 -->
-          <div class="back-section">
+          <div class="back-section reveal">
             <div class="back-eyebrow">02 · Practice</div>
             <div class="back-h2">手技・練習</div>
 
@@ -674,7 +714,7 @@ button{font-family:inherit;}
           </div>
 
           <!-- 03 超音波の知識を深める -->
-          <div class="back-section">
+          <div class="back-section reveal">
             <div class="back-eyebrow">03 · Knowledge</div>
             <div class="back-h2">超音波の知識を深める</div>
 
@@ -713,7 +753,7 @@ button{font-family:inherit;}
           </div>
 
           <!-- 04 部活動コンテンツ -->
-          <div class="back-section">
+          <div class="back-section reveal">
             <div class="back-eyebrow">04 · Activity</div>
             <div class="back-h2">部活動コンテンツ</div>
 
@@ -847,7 +887,38 @@ function toggleFlip(){
   const btnText = document.getElementById('flip-toggle-text');
   btn.setAttribute('aria-label', _isFlipped ? 'ホームに戻る' : 'ポータルを見る');
   if(btnText) btnText.textContent = _isFlipped ? 'ホーム' : 'ポータル';
+
+  // 裏面（ポータル）に切り替わった時、ヒーロー演出を毎回最初から再生する
+  if(_isFlipped) playBackHeroAnim();
 }
+
+// ===================== 裏面：スクロールで順番に浮き上がる演出 =====================
+let _revealObserver = null;
+function playBackHeroAnim(){
+  const hero = document.getElementById('back-hero-anim');
+  if(!hero) return;
+  hero.classList.remove('in-view');
+  // 一度クラスを外してから再度付けることで、毎回アニメーションを再生させる
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=> hero.classList.add('in-view'));
+  });
+}
+
+function setupRevealObserver(){
+  const targets = document.querySelectorAll('.reveal');
+  if(!targets.length) return;
+  if(_revealObserver) _revealObserver.disconnect();
+  _revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        _revealObserver.unobserve(entry.target); // 一度表示したら監視終了（毎回戻らないように）
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  targets.forEach(el => _revealObserver.observe(el));
+}
+window.addEventListener('DOMContentLoaded', setupRevealObserver);
 
 // ===================== 画面が必ず最上部から表示されるようにする =====================
 // PWA起動時・ホーム画面復帰時などにスクロール位置がズレてヘッダーが
