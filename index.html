@@ -178,7 +178,7 @@ button{font-family:inherit;}
   background:radial-gradient(ellipse 120% 100% at 50% -20%, rgba(232,160,32,.16), transparent 60%);
   border-bottom:1px solid var(--border);
 }
-.home-header-top{display:flex;align-items:center;justify-content:space-between;max-width:640px;margin:0 auto;gap:8px;padding-right:84px;}
+.home-header-top{display:flex;align-items:center;justify-content:space-between;max-width:640px;margin:0 auto;gap:8px;padding-right:104px;}
 .brand-mark{display:flex;align-items:center;gap:9px;min-width:0;flex-shrink:0;}
 .brand-mark img{height:26px;width:auto;}
 .brand-mark span{font-family:"Bebas Neue",sans-serif;font-size:17px;letter-spacing:.05em;color:var(--text);}
@@ -212,11 +212,11 @@ button{font-family:inherit;}
 .greet-name{font-size:17px;font-weight:700;line-height:1.3;}
 .greet-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
 
-.home-main{max-width:640px;margin:0 auto;padding:28px 20px 80px;}
+.home-main{max-width:640px;margin:0 auto;padding:28px 20px 24px;}
 
 .sec-label{
   font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--orange);
-  text-transform:uppercase;margin:30px 0 10px;display:flex;align-items:center;gap:8px;
+  text-transform:uppercase;margin:24px 0 10px;display:flex;align-items:center;gap:8px;
 }
 .sec-label:first-child{margin-top:0;}
 .sec-label::after{content:"";flex:1;height:1px;background:var(--border);}
@@ -337,7 +337,8 @@ button{font-family:inherit;}
 }
 .gm-ack-btn:hover{background:var(--orange-light);transform:translateY(-1px);}
 
-
+/* インストール手順モーダル */
+.guide-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:600;
   align-items:flex-end;justify-content:center;
 }
@@ -850,7 +851,7 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
           <!-- 02 手技・練習 -->
           <div class="back-section reveal">
             <div class="back-eyebrow">02 · Practice</div>
-            <div class="back-h2">手技・練習</div>
+            <div class="back-h2">手技練習に</div>
 
             <div class="portal-card">
               <div class="portal-card-head">
@@ -876,7 +877,7 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
           <!-- 03 超音波の知識を深める -->
           <div class="back-section reveal">
             <div class="back-eyebrow">03 · Knowledge</div>
-            <div class="back-h2">超音波の知識を深める</div>
+            <div class="back-h2">超音波について詳しくなろう</div>
 
             <div class="portal-card">
               <div class="portal-card-head">
@@ -915,7 +916,7 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
           <!-- 04 部活動コンテンツ -->
           <div class="back-section reveal">
             <div class="back-eyebrow">04 · Activity</div>
-            <div class="back-h2">部活動コンテンツ</div>
+            <div class="back-h2">POCUSを臨床で活かそう</div>
 
             <div class="portal-card">
               <div class="portal-card-head">
@@ -958,7 +959,7 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
           <!-- 06 その他コンテンツ -->
           <div class="back-section reveal">
             <div class="back-eyebrow">06 · More</div>
-            <div class="back-h2">その他のコンテンツ</div>
+            <div class="back-h2">その他</div>
 
             <div class="portal-card">
               <div class="portal-card-head">

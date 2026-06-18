@@ -65,7 +65,7 @@ textarea,input{font-family:inherit;}
 /* HEADER */
 .top-header{
   position:sticky;top:0;z-index:50;background:var(--dark);border-bottom:1px solid var(--border);
-  padding:0 16px;
+  padding:env(safe-area-inset-top) 16px 0;
 }
 .top-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;height:54px;gap:12px;}
 .back-btn{
@@ -159,7 +159,7 @@ textarea,input{font-family:inherit;}
 
 /* MODAL（投稿フォーム） */
 .modal-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;
   align-items:flex-end;justify-content:center;
 }
 .modal-overlay.open{display:flex;}
