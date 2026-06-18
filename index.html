@@ -123,16 +123,58 @@ button{font-family:inherit;}
 .auth-btn:disabled{background:var(--border);color:var(--text-dim);cursor:not-allowed;transform:none;}
 .auth-hint{font-size:11px;color:var(--text-dim);text-align:center;margin-top:16px;line-height:1.6;}
 
-/* ===================== HOME ===================== */
+/* ===================== HOME (FLIP CONTAINER) ===================== */
 #home-screen{display:none;min-height:100vh;}
 #home-screen.active{display:block;}
 
+.flip-scene{
+  position:relative;width:100%;min-height:100vh;
+  perspective:2400px;
+}
+.flip-card{
+  position:relative;width:100%;min-height:100vh;
+  transition:transform .85s cubic-bezier(.4,.1,.2,1);
+  transform-style:preserve-3d;
+}
+.flip-card.is-flipped{transform:rotateY(180deg);}
+
+.flip-face{
+  width:100%;min-height:100vh;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+.flip-face-front{
+  position:relative;
+}
+.flip-face-back{
+  position:absolute;top:0;left:0;
+  transform:rotateY(180deg);
+  background:var(--black);
+}
+
+/* 反転中は裏面のスクロールを無効化、表示中のみ操作可 */
+.flip-card.is-flipped .flip-face-front{visibility:hidden;}
+.flip-card:not(.is-flipped) .flip-face-back{visibility:hidden;}
+
+/* ===== 反転ボタン（右上の小さいアイコン） ===== */
+.flip-toggle{
+  position:fixed;top:calc(16px + env(safe-area-inset-top));right:16px;z-index:120;
+  width:38px;height:38px;border-radius:10px;
+  background:rgba(20,20,20,.85);border:1px solid var(--border-light);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;
+  backdrop-filter:blur(6px);
+  color:var(--text-muted);
+}
+.flip-toggle:hover{border-color:var(--orange);color:var(--orange);transform:translateY(-1px);}
+.flip-toggle svg{width:17px;height:17px;}
+
 .home-header{
-  position:relative;padding:22px 20px 30px;overflow:hidden;
+  position:relative;padding:calc(22px + env(safe-area-inset-top)) 20px 30px;overflow:hidden;
   background:radial-gradient(ellipse 120% 100% at 50% -20%, rgba(232,160,32,.16), transparent 60%);
   border-bottom:1px solid var(--border);
 }
-.home-header-top{display:flex;align-items:center;justify-content:space-between;max-width:640px;margin:0 auto;}
+.home-header-top{display:flex;align-items:center;justify-content:space-between;max-width:640px;margin:0 auto;padding-right:46px;}
 .brand-mark{display:flex;align-items:center;gap:9px;}
 .brand-mark img{height:26px;width:auto;}
 .brand-mark span{font-family:"Bebas Neue",sans-serif;font-size:18px;letter-spacing:.06em;color:var(--text);}
@@ -257,6 +299,120 @@ button{font-family:inherit;}
 .guide-note{
   font-size:11px;color:var(--text-dim);text-align:center;margin-top:6px;line-height:1.7;
 }
+
+/* ===================== BACK FACE (PORTAL STYLE) ===================== */
+.back-hero{
+  position:relative;padding:calc(64px + env(safe-area-inset-top)) 20px 40px;overflow:hidden;text-align:center;
+  background:radial-gradient(ellipse 120% 100% at 50% -10%, rgba(232,160,32,.18), transparent 65%);
+  border-bottom:1px solid var(--border);
+}
+.back-hero-logo{width:88px;margin:0 auto 22px;}
+.back-hero-eyebrow{
+  font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.18em;
+  color:var(--text-muted);margin-bottom:16px;
+}
+.back-hero-title{
+  font-family:"Noto Sans JP",sans-serif;font-weight:900;
+  font-size:clamp(28px,8vw,42px);line-height:1.35;letter-spacing:.01em;
+  color:var(--text);
+}
+.back-hero-title .accent{color:var(--orange);}
+.back-hero-sub{
+  font-size:13.5px;color:var(--text-muted);line-height:1.8;margin-top:18px;
+  max-width:420px;margin-left:auto;margin-right:auto;
+}
+
+.back-main{max-width:640px;margin:0 auto;padding:36px 20px 90px;}
+
+.back-section{margin-bottom:52px;}
+.back-section:last-child{margin-bottom:0;}
+
+.back-eyebrow{
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.12em;
+  color:var(--orange);margin-bottom:10px;font-weight:600;
+}
+.back-h2{
+  font-family:"Noto Sans JP",sans-serif;font-weight:900;font-size:23px;
+  line-height:1.4;margin-bottom:18px;letter-spacing:.01em;
+}
+
+/* 理念ブロック（4ステップ循環） */
+.cycle-grid{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+.cycle-item{
+  display:flex;align-items:flex-start;gap:14px;background:var(--card);
+  border:1px solid var(--border);border-radius:12px;padding:15px 16px;
+}
+.cycle-num{
+  width:30px;height:30px;border-radius:50%;background:var(--orange-bg);
+  border:1px solid rgba(232,160,32,.3);color:var(--orange);
+  font-family:"Bebas Neue",sans-serif;font-size:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.cycle-body{flex:1;}
+.cycle-title{font-size:13.5px;font-weight:700;margin-bottom:3px;}
+.cycle-desc{font-size:11.5px;color:var(--text-muted);line-height:1.6;}
+
+/* コンテンツカード（ポータルの各リソース） */
+.portal-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:18px 18px 20px;margin-bottom:10px;
+}
+.portal-card.disabled{opacity:.6;}
+.portal-card-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.portal-card-icon{
+  width:38px;height:38px;border-radius:10px;background:var(--orange-bg);
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;
+}
+.portal-card-title{font-size:14.5px;font-weight:700;flex:1;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.portal-card-desc{font-size:12.5px;color:var(--text-muted);line-height:1.75;}
+.portal-card-desc strong{color:var(--text);font-weight:700;}
+.portal-card-tag{
+  font-size:9px;font-weight:700;color:var(--orange);background:var(--orange-bg);
+  border:1px solid rgba(232,160,32,.25);padding:2px 7px;border-radius:4px;
+  font-family:"JetBrains Mono",monospace;letter-spacing:.02em;white-space:nowrap;
+}
+.portal-card-tag.muted{color:var(--text-dim);background:var(--black);border-color:var(--border-light);}
+.portal-card-link{
+  display:inline-flex;align-items:center;gap:5px;margin-top:12px;
+  font-size:12.5px;font-weight:700;color:var(--orange);text-decoration:none;
+}
+.portal-card-link:hover{color:var(--orange-light);}
+.portal-card-note{
+  margin-top:10px;font-size:11px;color:var(--text-dim);
+  background:var(--black);border:1px solid var(--border);border-radius:8px;
+  padding:8px 11px;line-height:1.6;
+}
+
+/* 臨床推論勉強会のミニステップ */
+.mini-steps{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.mini-step{display:flex;align-items:center;gap:10px;}
+.mini-step-num{
+  width:22px;height:22px;border-radius:50%;background:var(--black);
+  border:1px solid var(--border-light);color:var(--text-muted);
+  font-family:"JetBrains Mono",monospace;font-size:11px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.mini-step-text{font-size:12px;color:var(--text-muted);line-height:1.5;}
+
+/* スケジュール */
+.schedule-list{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+.schedule-item{
+  display:flex;align-items:center;gap:14px;background:var(--card);
+  border:1px solid var(--border);border-radius:12px;padding:13px 15px;
+}
+.schedule-date{
+  font-family:"Bebas Neue",sans-serif;text-align:center;flex-shrink:0;width:46px;
+  color:var(--orange);
+}
+.schedule-date .month{font-size:10px;letter-spacing:.06em;display:block;color:var(--text-dim);}
+.schedule-date .day{font-size:22px;line-height:1.1;display:block;}
+.schedule-body{flex:1;min-width:0;}
+.schedule-title{font-size:13px;font-weight:700;}
+.schedule-tag{font-size:10.5px;color:var(--text-muted);margin-top:2px;}
+
+.back-footer{
+  text-align:center;font-size:11px;color:var(--text-dim);margin-top:46px;line-height:1.8;
+}
 </style>
 </head>
 <body>
@@ -317,102 +473,320 @@ button{font-family:inherit;}
 
 <!-- ===== HOME SCREEN ===== -->
 <div id="home-screen">
-  <div class="home-header">
-    <div class="home-header-top">
-      <div class="brand-mark">
-        <img src="assets/logo-icon-dark.png" alt="K-PICS">
-        <span>K-PICS</span>
-      </div>
-      <button class="logout-btn" onclick="doLogout()">ログアウト</button>
-    </div>
-    <div class="greet">
-      <div class="greet-avatar" id="greet-avatar">−</div>
-      <div>
-        <div class="greet-name" id="greet-name">読み込み中...</div>
-        <div class="greet-sub" id="greet-sub"></div>
-      </div>
-    </div>
-  </div>
 
-  <div class="home-main">
+  <!-- 右上の反転ボタン -->
+  <button class="flip-toggle" id="flip-toggle-btn" onclick="toggleFlip()" aria-label="ポータルを見る">
+    <svg id="flip-icon-to-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17v-6h-6"/><path d="M21 11a9 9 0 00-15-6.7L3 7"/><path d="M3 13a9 9 0 0015 6.7l3-2.7"/></svg>
+  </button>
 
-    <div id="install-banner" class="install-banner" style="display:none;" onclick="openInstallGuide()">
-      <div class="install-banner-icon">📲</div>
-      <div class="install-banner-body">
-        <div class="install-banner-title">K-PICSをホーム画面に追加できます</div>
-        <div class="install-banner-desc">タップして手順を見る</div>
-      </div>
-      <button class="install-banner-close" onclick="event.stopPropagation(); dismissInstallBanner()" aria-label="閉じる">✕</button>
-    </div>
+  <div class="flip-scene">
+    <div class="flip-card" id="flip-card">
 
-    <div class="sec-label">手技を学ぶ</div>
-    <div class="menu-group">
-      <div class="menu-card disabled">
-        <div class="menu-icon">🩺</div>
-        <div class="menu-body">
-          <div class="menu-title">エコー手技マスター <span class="badge-soon">準備中</span></div>
-          <div class="menu-desc">エコー手技をひとつひとつ習得していくコンテンツ</div>
+      <!-- ============ 表面：ショートカット集 ============ -->
+      <div class="flip-face flip-face-front">
+        <div class="home-header">
+          <div class="home-header-top">
+            <div class="brand-mark">
+              <img src="assets/logo-icon-dark.png" alt="K-PICS">
+              <span>K-PICS</span>
+            </div>
+            <button class="logout-btn" onclick="doLogout()">ログアウト</button>
+          </div>
+          <div class="greet">
+            <div class="greet-avatar" id="greet-avatar">−</div>
+            <div>
+              <div class="greet-name" id="greet-name">読み込み中...</div>
+              <div class="greet-sub" id="greet-sub"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-main">
+
+          <div id="install-banner" class="install-banner" style="display:none;" onclick="openInstallGuide()">
+            <div class="install-banner-icon">📲</div>
+            <div class="install-banner-body">
+              <div class="install-banner-title">K-PICSをホーム画面に追加できます</div>
+              <div class="install-banner-desc">タップして手順を見る</div>
+            </div>
+            <button class="install-banner-close" onclick="event.stopPropagation(); dismissInstallBanner()" aria-label="閉じる">✕</button>
+          </div>
+
+          <div class="sec-label">手技を学ぶ</div>
+          <div class="menu-group">
+            <div class="menu-card disabled">
+              <div class="menu-icon">🩺</div>
+              <div class="menu-body">
+                <div class="menu-title">エコー手技マスター <span class="badge-soon">準備中</span></div>
+                <div class="menu-desc">エコー手技をひとつひとつ習得していくコンテンツ</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-label">認定試験</div>
+          <div class="menu-group">
+            <a class="menu-card primary" href="https://wj-medtech.github.io/requirements/" target="_blank" rel="noopener">
+              <div class="menu-icon solid">🏆</div>
+              <div class="menu-body">
+                <div class="menu-title">認定試験受験予定の方はこちら <span class="badge-ext">認定アプリへ</span></div>
+                <div class="menu-desc">進捗の登録・確認はこちらの認定アプリで行います</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+
+          <div class="sec-label">興味のある所だけ学びたい方へ</div>
+          <div class="menu-group">
+            <div class="menu-card" onclick="toggleFlip()">
+              <div class="menu-icon">📚</div>
+              <div class="menu-body">
+                <div class="menu-title">ポータルを見る</div>
+                <div class="menu-desc">気になるテーマだけピンポイントで学べる、K-PICSの全学習リソースへアクセスできます</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+
+          <div class="sec-label">予定を確認する</div>
+          <div class="menu-group">
+            <a class="menu-card" href="calendar.html">
+              <div class="menu-icon">🗓️</div>
+              <div class="menu-body">
+                <div class="menu-title">イベント日程を確認する</div>
+                <div class="menu-desc">部員なら誰でも追加・編集できるカレンダー</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+
+          <div class="footer-note">
+            <img src="assets/logo-icon-dark.png" alt="">K-PICS &nbsp;|&nbsp; 学びを、次の代へ。
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="sec-label">系統的に学びたい方へ</div>
-    <div class="menu-desc" style="margin:-2px 0 12px;padding:0 2px;">順番に・体系的に学びたい人向けのマップです。今どこまで学んだか、次に何をすべきかが分かります。</div>
-    <div class="menu-group">
-      <div class="menu-card disabled">
-        <div class="menu-icon">🔭</div>
-        <div class="menu-body">
-          <div class="menu-title">MAP1 ・ 初学者の方はこちら <span class="badge-soon">準備中</span></div>
-          <div class="menu-desc">基本から学ぶ手技マップ（構想中）</div>
+      <!-- ============ 裏面：ポータル（読み物） ============ -->
+      <div class="flip-face flip-face-back">
+        <div class="back-hero">
+          <img class="back-hero-logo" src="assets/logo-icon-dark.png" alt="K-PICS">
+          <div class="back-hero-eyebrow">K - P I C S 　部員専用ポータル</div>
+          <div class="back-hero-title">学びを、<span class="accent">次の代へ。</span></div>
+          <div class="back-hero-sub">認定試験・エコー手技・勉強会・競技練習など<br>K-PICSの学習リソースへアクセスしよう</div>
+        </div>
+
+        <div class="back-main">
+
+          <!-- このポータルの目的 -->
+          <div class="back-section">
+            <div class="back-eyebrow">このポータルの目的</div>
+            <div class="back-h2">学びを<span style="color:var(--orange);">次の代へ</span>と引き継いでいく</div>
+            <div class="portal-card-desc" style="margin-bottom:4px;">先輩が積み上げてきた知識・技術・経験を、このポータルに集約し、次の世代へ確実につなぐ。K-PICSは「やってみた人が教える」学生主体の教育循環システムを目指している。</div>
+            <div class="cycle-grid">
+              <div class="cycle-item">
+                <div class="cycle-num">1</div>
+                <div class="cycle-body">
+                  <div class="cycle-title">練習・学習する</div>
+                  <div class="cycle-desc">このポータルのリソースを活用して技術・知識を磨く</div>
+                </div>
+              </div>
+              <div class="cycle-item">
+                <div class="cycle-num">2</div>
+                <div class="cycle-body">
+                  <div class="cycle-title">認定試験を受ける</div>
+                  <div class="cycle-desc">一定水準に達したと評価され、バッジが付与される</div>
+                </div>
+              </div>
+              <div class="cycle-item">
+                <div class="cycle-num">3</div>
+                <div class="cycle-body">
+                  <div class="cycle-title">指導者側へまわる</div>
+                  <div class="cycle-desc">バッジ取得者が後輩の指導を担い、知識を引き継ぐ</div>
+                </div>
+              </div>
+              <div class="cycle-item">
+                <div class="cycle-num">4</div>
+                <div class="cycle-body">
+                  <div class="cycle-title">知見をポータルへ</div>
+                  <div class="cycle-desc">発見したコツ・良問・台本をこのポータルに蓄積する</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 01 認定試験制度 -->
+          <div class="back-section">
+            <div class="back-eyebrow">01 · Certification</div>
+            <div class="back-h2">認定試験制度</div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🏆</div>
+                <div class="portal-card-title">認定試験とは？</div>
+              </div>
+              <div class="portal-card-desc">エコー手技が一定水準に達したと評価されると合格し、<strong>バッジが付与される</strong>。バッジ取得者は指導者側にまわり、後輩の育成を担う。これがK-PICSの核心、<strong>学生主体の教育循環システム</strong>だ。</div>
+              <div class="portal-card-note">📅 直近の認定試験：2026年8月2日<br>試験にエントリーするには、まず認定アプリへの登録が必要です。</div>
+              <a class="portal-card-link" href="https://wj-medtech.github.io/requirements/" target="_blank" rel="noopener">認定アプリへ登録する
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🔄</div>
+                <div class="portal-card-title">教育循環の仕組み</div>
+              </div>
+              <div class="portal-card-desc">教わる側 → 練習 → 試験合格 → 教える側。この循環を回し続けることで、部のレベルが世代をまたいで積み上がっていく。</div>
+            </div>
+          </div>
+
+          <!-- 02 手技・練習 -->
+          <div class="back-section">
+            <div class="back-eyebrow">02 · Practice</div>
+            <div class="back-h2">手技・練習</div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🩺</div>
+                <div class="portal-card-title">エコー手技マスター <span class="portal-card-tag muted">準備中</span></div>
+              </div>
+              <div class="portal-card-desc">エコー手技をひとつひとつ習得していくコンテンツ。準備中です。</div>
+            </div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🔬</div>
+                <div class="portal-card-title">エコー手技のコツ共有 <span class="portal-card-tag muted">開発予定</span></div>
+              </div>
+              <div class="portal-card-desc">日々の練習で発見したコツを部員内で共有しよう。先輩から後輩へ、知識の蓄積が部全体を強くする。</div>
+            </div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🎯</div>
+                <div class="portal-card-title">絵合わせ練習</div>
+              </div>
+              <div class="portal-card-desc">提示された超音波画像を実際に再現し、タイムを測る練習ツール。1人3枚×3人で計9枚のリレー形式。Student POCUS League（SPL）の競技種目の一つだが、<strong>出場しない人も練習に最適！</strong></div>
+              <div class="portal-card-note">第4回SPL戦績：機材トラブルありながら99秒で全国1位 🥇<br>練習では1:08を記録したことも。</div>
+              <a class="portal-card-link" href="https://wj-medtech.github.io/-/" target="_blank" rel="noopener">絵合わせ練習アプリへ
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- 03 超音波の知識を深める -->
+          <div class="back-section">
+            <div class="back-eyebrow">03 · Knowledge</div>
+            <div class="back-h2">超音波の知識を深める</div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">⚙️</div>
+                <div class="portal-card-title">工学系知識の学習 <span class="portal-card-tag">SPLで実績あり</span></div>
+              </div>
+              <div class="portal-card-desc">超音波とは何か？機器の原理・各モードの解説など。<strong>超音波専門医試験</strong>でも問われる範囲。これを理解するとエコーの見え方が変わる。</div>
+              <a class="portal-card-link" href="https://wj-medtech.github.io/pocus-loop/" target="_blank" rel="noopener">POCUS-LOOPアプリへ
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🏥</div>
+                <div class="portal-card-title">キャノン超音波講座</div>
+              </div>
+              <div class="portal-card-desc">キャノンメディカルによる超音波教育コンテンツ。体系的に学べる良質な無料リソース。</div>
+              <a class="portal-card-link" href="https://www.medical.canon/jp/lecture/index.html" target="_blank" rel="noopener">講座サイトへ
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">📖</div>
+                <div class="portal-card-title">JSUM Ultrasound Path</div>
+              </div>
+              <div class="portal-card-desc">日本超音波医学会によるeラーニング。専門医レベルの知識へのアクセス。</div>
+              <a class="portal-card-link" href="https://www.jsum.or.jp/ulpath/" target="_blank" rel="noopener">ULPATHへ
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- 04 部活動コンテンツ -->
+          <div class="back-section">
+            <div class="back-eyebrow">04 · Activity</div>
+            <div class="back-h2">部活動コンテンツ</div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🚑</div>
+                <div class="portal-card-title">メディカルラリー症例ストック <span class="portal-card-tag muted">検討中</span></div>
+              </div>
+              <div class="portal-card-desc">POCUSに特化したメディカルラリー症例台本。SP演技台本・評価項目をストックしていく。台本テンプレートを設計し、埋めて登録していく仕組みを構築予定。</div>
+            </div>
+
+            <div class="portal-card">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">🧠</div>
+                <div class="portal-card-title">臨床推論勉強会</div>
+              </div>
+              <div class="portal-card-desc">開催のお知らせ・過去の良問ストックへのアクセスはこちら。</div>
+              <div class="mini-steps">
+                <div class="mini-step"><div class="mini-step-num">1</div><div class="mini-step-text">事前共有：症候・検査所見をメンバーに予告</div></div>
+                <div class="mini-step"><div class="mini-step-num">2</div><div class="mini-step-text">個人ワーク：各自で鑑別疾患を挙げる</div></div>
+                <div class="mini-step"><div class="mini-step-num">3</div><div class="mini-step-text">解説：外来での思考フロー（内科外来マニュアル参照）を解説</div></div>
+                <div class="mini-step"><div class="mini-step-num">4</div><div class="mini-step-text">グループ作問バトル：チームで作問・出題し合い、良問はアプリへ格納</div></div>
+              </div>
+              <div class="portal-card-note">問題ストックアプリ：開発予定</div>
+            </div>
+          </div>
+
+          <!-- 05 イベントカレンダー -->
+          <div class="back-section">
+            <div class="back-eyebrow">05 · Schedule</div>
+            <div class="back-h2">イベントカレンダー</div>
+            <div class="schedule-list">
+              <div class="schedule-item">
+                <div class="schedule-date"><span class="month">AUG</span><span class="day">02</span></div>
+                <div class="schedule-body">
+                  <div class="schedule-title">POCUS認定試験</div>
+                  <div class="schedule-tag">要エントリー</div>
+                </div>
+              </div>
+              <div class="schedule-item">
+                <div class="schedule-date"><span class="month">TBD</span><span class="day">−</span></div>
+                <div class="schedule-body">
+                  <div class="schedule-title">臨床推論勉強会</div>
+                  <div class="schedule-tag">随時 ・ 勉強会</div>
+                </div>
+              </div>
+              <div class="schedule-item">
+                <div class="schedule-date"><span class="month">TBD</span><span class="day">−</span></div>
+                <div class="schedule-body">
+                  <div class="schedule-title">第5回 Student POCUS League</div>
+                  <div class="schedule-tag">大会</div>
+                </div>
+              </div>
+              <div class="menu-group" style="margin-top:14px;">
+                <a class="menu-card" href="calendar.html">
+                  <div class="menu-icon">🗓️</div>
+                  <div class="menu-body">
+                    <div class="menu-title">イベント日程をすべて見る</div>
+                    <div class="menu-desc">部員なら誰でも追加・編集できるカレンダー</div>
+                  </div>
+                  <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="back-footer">
+            <img src="assets/logo-icon-dark.png" alt="" style="height:16px;width:auto;display:inline-block;vertical-align:middle;opacity:.5;margin-right:5px;">
+            © 2026 K-PICS 部員専用ポータル
+          </div>
         </div>
       </div>
-      <div class="menu-card disabled">
-        <div class="menu-icon">🏅</div>
-        <div class="menu-body">
-          <div class="menu-title">MAP2 ・ バッジ取得者の方はこちら <span class="badge-soon">準備中</span></div>
-          <div class="menu-desc">合格者向けの次のステップ（構想中）</div>
-        </div>
-      </div>
-    </div>
 
-    <div class="sec-label">認定試験</div>
-    <div class="menu-group">
-      <a class="menu-card primary" href="https://wj-medtech.github.io/requirements/" target="_blank" rel="noopener">
-        <div class="menu-icon solid">🏆</div>
-        <div class="menu-body">
-          <div class="menu-title">認定試験受験予定の方はこちら <span class="badge-ext">認定アプリへ</span></div>
-          <div class="menu-desc">進捗の登録・確認はこちらの認定アプリで行います</div>
-        </div>
-        <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-    </div>
-
-    <div class="sec-label">興味のある所だけ学びたい方へ</div>
-    <div class="menu-group">
-      <a class="menu-card" href="https://wj-medtech.github.io/K-PICS/" target="_blank" rel="noopener">
-        <div class="menu-icon">📚</div>
-        <div class="menu-body">
-          <div class="menu-title">ポータルサイトはこちら</div>
-          <div class="menu-desc">気になるテーマだけピンポイントで学べる、K-PICSの全学習リソースへアクセスできるポータルサイトです</div>
-        </div>
-        <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-    </div>
-
-    <div class="sec-label">予定を確認する</div>
-    <div class="menu-group">
-      <a class="menu-card" href="calendar.html">
-        <div class="menu-icon">🗓️</div>
-        <div class="menu-body">
-          <div class="menu-title">イベント日程を確認する</div>
-          <div class="menu-desc">部員なら誰でも追加・編集できるカレンダー</div>
-        </div>
-        <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-    </div>
-
-    <div class="footer-note">
-      <img src="assets/logo-icon-dark.png" alt="">K-PICS &nbsp;|&nbsp; 学びを、次の代へ。
     </div>
   </div>
 </div>
@@ -492,5 +866,39 @@ button{font-family:inherit;}
 </div>
 
 <script src="app.js"></script>
+<script>
+// ===================== 表⇄裏 フリップ制御 =====================
+let _isFlipped = false;
+function toggleFlip(){
+  _isFlipped = !_isFlipped;
+  const card = document.getElementById('flip-card');
+  card.classList.toggle('is-flipped', _isFlipped);
+
+  // 反転後に見える面を必ず先頭から表示する
+  const targetFace = _isFlipped
+    ? card.querySelector('.flip-face-back')
+    : card.querySelector('.flip-face-front');
+  if(targetFace) targetFace.scrollTop = 0;
+  window.scrollTo(0,0);
+
+  // ボタンの見た目を、今いる面の「行き先」が分かるように切り替える
+  const btn = document.getElementById('flip-toggle-btn');
+  btn.setAttribute('aria-label', _isFlipped ? 'ホームに戻る' : 'ポータルを見る');
+}
+
+// ===================== 画面が必ず最上部から表示されるようにする =====================
+// PWA起動時・ホーム画面復帰時などにスクロール位置がズレてヘッダーが
+// 隠れてしまう（ログアウトボタンが押せない）問題への対策
+function scrollAllToTop(){
+  window.scrollTo(0,0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+window.addEventListener('load', scrollAllToTop);
+window.addEventListener('pageshow', scrollAllToTop);
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') scrollAllToTop();
+});
+</script>
 </body>
 </html>
