@@ -221,10 +221,10 @@ button{font-family:inherit;}
 .sec-label:first-child{margin-top:0;}
 .sec-label::after{content:"";flex:1;height:1px;background:var(--border);}
 
-.menu-group{display:flex;flex-direction:column;gap:8px;}
+.menu-group{display:flex;flex-direction:column;gap:6px;}
 .menu-card{
-  display:flex;align-items:center;gap:14px;background:var(--card);
-  border:1px solid var(--border);border-radius:12px;padding:15px 16px;
+  display:flex;align-items:center;gap:12px;background:var(--card);
+  border:1px solid var(--border);border-radius:12px;padding:12px 14px;
   cursor:pointer;text-decoration:none;color:var(--text);transition:all .18s;
   position:relative;overflow:hidden;
 }
@@ -234,14 +234,14 @@ button{font-family:inherit;}
 .menu-card.disabled:hover{background:var(--card);transform:none;border-color:var(--border);}
 .menu-card.primary{border-color:rgba(232,160,32,.35);background:linear-gradient(135deg, rgba(232,160,32,.1), var(--card) 60%);}
 .menu-icon{
-  width:42px;height:42px;border-radius:10px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:19px;
+  width:36px;height:36px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
   background:var(--orange-bg);
 }
 .menu-icon.solid{background:var(--orange);}
 .menu-body{flex:1;min-width:0;}
-.menu-title{font-size:14.5px;font-weight:700;line-height:1.35;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
-.menu-desc{font-size:11.5px;color:var(--text-muted);margin-top:3px;line-height:1.4;}
+.menu-title{font-size:13.5px;font-weight:700;line-height:1.3;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.menu-desc{font-size:11px;color:var(--text-muted);margin-top:2px;line-height:1.35;}
 .menu-chevron{color:var(--text-dim);flex-shrink:0;transition:transform .18s;}
 .menu-card:hover .menu-chevron{transform:translateX(2px);color:var(--orange);}
 .badge-soon{
@@ -268,7 +268,7 @@ button{font-family:inherit;}
 .menu-card.add-card .menu-desc{color:var(--text-dim);}
 
 .footer-note{
-  text-align:center;font-size:11px;color:var(--text-dim);margin-top:40px;line-height:1.8;
+  text-align:center;font-size:11px;color:var(--text-dim);margin-top:28px;line-height:1.8;
 }
 .footer-note img{height:16px;width:auto;display:inline-block;vertical-align:middle;opacity:.5;margin-right:5px;}
 
@@ -521,7 +521,7 @@ button{font-family:inherit;}
 .schedule-tag{font-size:10.5px;color:var(--text-muted);margin-top:2px;}
 
 .back-footer{
-  text-align:center;font-size:11px;color:var(--text-dim);margin-top:46px;line-height:1.8;
+  text-align:center;font-size:11px;color:var(--text-dim);margin-top:30px;line-height:1.8;
 }
 
 /* ===================== 下部タブバー ===================== */
@@ -543,8 +543,8 @@ button{font-family:inherit;}
 .tabbar-item:active{opacity:.7;}
 
 /* タブバーがある画面では、本文の下に余白を確保してコンテンツが隠れないようにする */
-body.has-tabbar .home-main{padding-bottom:calc(86px + env(safe-area-inset-bottom));}
-body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom));}
+body.has-tabbar .home-main{padding-bottom:calc(58px + env(safe-area-inset-bottom));}
+body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom));}
 
 </style>
 </head>
@@ -655,19 +655,14 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
               <div class="menu-icon solid">📋</div>
               <div class="menu-body">
                 <div class="menu-title">K-PICSの部員として</div>
-                <div class="menu-desc">自主練を始める前に必ず読んでください</div>
+                <div class="menu-desc">まず最初に必ずお読みください</div>
               </div>
               <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
+          </div>
 
-            <div class="menu-card disabled">
-              <div class="menu-icon">🩺</div>
-              <div class="menu-body">
-                <div class="menu-title">エコー手技マスター <span class="badge-soon">準備中</span></div>
-                <div class="menu-desc">エコー手技をひとつひとつ習得していくコンテンツ</div>
-              </div>
-            </div>
-
+          <div class="sec-label">認定試験</div>
+          <div class="menu-group">
             <a class="menu-card primary" href="https://wj-medtech.github.io/requirements/" target="_blank" rel="noopener">
               <div class="menu-icon solid">🏆</div>
               <div class="menu-body">
@@ -680,6 +675,14 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
 
           <div class="sec-label">手技練習に</div>
           <div class="menu-group">
+            <a class="menu-card" href="technique.html">
+              <div class="menu-icon">🩺</div>
+              <div class="menu-body">
+                <div class="menu-title">エコー手技マスター</div>
+                <div class="menu-desc">エコー手技をひとつひとつ習得していくコンテンツ</div>
+              </div>
+              <svg class="menu-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
             <a class="menu-card" href="https://wj-medtech.github.io/-/" target="_blank" rel="noopener">
               <div class="menu-icon">🎯</div>
               <div class="menu-body">
@@ -720,6 +723,13 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
 
           <div class="sec-label">POCUSを臨床で活かそう</div>
           <div class="menu-group">
+            <div class="menu-card disabled">
+              <div class="menu-icon">📋</div>
+              <div class="menu-body">
+                <div class="menu-title">低学年向け疾患リスト <span class="badge-soon">構想中</span></div>
+                <div class="menu-desc">POCUSでよく扱う疾患の理解を深める</div>
+              </div>
+            </div>
             <div class="menu-card disabled">
               <div class="menu-icon">🚑</div>
               <div class="menu-body">
@@ -856,9 +866,12 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
             <div class="portal-card">
               <div class="portal-card-head">
                 <div class="portal-card-icon">🩺</div>
-                <div class="portal-card-title">エコー手技マスター <span class="portal-card-tag muted">準備中</span></div>
+                <div class="portal-card-title">エコー手技マスター</div>
               </div>
-              <div class="portal-card-desc">エコー手技をひとつひとつ習得していくコンテンツ。準備中です。</div>
+              <div class="portal-card-desc">部位ごとに、プローブの持ち方・当て方から評価項目、よくある失敗例・コツまでをまとめた手技の教科書。部員みんなで書き込み・編集していく。</div>
+              <a class="portal-card-link" href="technique.html">エコー手技マスターへ
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
             </div>
 
             <div class="portal-card">
@@ -913,10 +926,18 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
             </div>
           </div>
 
-          <!-- 04 部活動コンテンツ -->
+          <!-- 04 POCUSを臨床で活かそう -->
           <div class="back-section reveal">
             <div class="back-eyebrow">04 · Activity</div>
             <div class="back-h2">POCUSを臨床で活かそう</div>
+
+            <div class="portal-card disabled">
+              <div class="portal-card-head">
+                <div class="portal-card-icon">📋</div>
+                <div class="portal-card-title">低学年向け疾患リスト <span class="portal-card-tag muted">構想中</span></div>
+              </div>
+              <div class="portal-card-desc">POCUSで頻繁に扱う疾患の理解を深めるためのページ。低学年がまず押さえておきたい疾患を整理していく予定です。</div>
+            </div>
 
             <div class="portal-card">
               <div class="portal-card-head">
@@ -942,23 +963,9 @@ body.has-tabbar .back-main{padding-bottom:calc(86px + env(safe-area-inset-bottom
             </div>
           </div>
 
-          <!-- 05 臨床知識 -->
+          <!-- 05 その他コンテンツ -->
           <div class="back-section reveal">
-            <div class="back-eyebrow">05 · Knowledge for Juniors</div>
-            <div class="back-h2">低学年向け 疾患リスト</div>
-
-            <div class="portal-card disabled">
-              <div class="portal-card-head">
-                <div class="portal-card-icon">📋</div>
-                <div class="portal-card-title">POCUSでよく扱う疾患リスト <span class="portal-card-tag muted">構想中</span></div>
-              </div>
-              <div class="portal-card-desc">POCUSで頻繁に扱う疾患の理解を深めるためのページ。低学年がまず押さえておきたい疾患を整理していく予定です。</div>
-            </div>
-          </div>
-
-          <!-- 06 その他コンテンツ -->
-          <div class="back-section reveal">
-            <div class="back-eyebrow">06 · More</div>
+            <div class="back-eyebrow">05 · More</div>
             <div class="back-h2">その他</div>
 
             <div class="portal-card">
