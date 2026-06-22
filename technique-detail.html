@@ -107,6 +107,37 @@ button{font-family:inherit;}
 }
 .item-card-body.empty{color:var(--text-dim);font-style:italic;}
 
+/* ⑧⑨ 失敗例・コツ投稿セクション */
+.tip-section{margin-top:8px;}
+.tip-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;}
+.tip-section-title{font-size:14px;font-weight:900;display:flex;align-items:center;gap:8px;min-width:0;}
+.tip-add-btn{
+  background:var(--orange-bg);border:1px solid rgba(232,160,32,.3);color:var(--orange);
+  font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;
+}
+.tip-add-btn:hover{background:rgba(232,160,32,.18);}
+.tip-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+.tip-card-text{font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;margin-bottom:10px;}
+.tip-card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.tip-card-author{font-size:11px;color:var(--text-muted);}
+.tip-card-actions{display:flex;gap:12px;flex-shrink:0;}
+.tip-card-action{background:none;border:none;color:var(--text-dim);font-size:11px;cursor:pointer;font-weight:700;padding:0;}
+.tip-card-action:hover{color:var(--orange);}
+.tip-card-action.danger:hover{color:#e85050;}
+.tip-empty{font-size:12px;color:var(--text-dim);padding:4px 2px 14px;}
+.tip-form{background:var(--card);border:1px solid var(--border-light);border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+.tip-textarea{
+  width:100%;background:var(--black);border:1px solid var(--border-light);border-radius:9px;
+  color:var(--text);font-size:13px;line-height:1.65;padding:11px 13px;font-family:inherit;
+  resize:vertical;min-height:64px;margin-bottom:10px;
+}
+.tip-form-actions{display:flex;gap:8px;}
+.tip-form-btn{flex:1;border:none;border-radius:8px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+.tip-form-btn.save{background:var(--orange);color:var(--black);}
+.tip-form-btn.save:disabled{opacity:.5;}
+.tip-form-btn.cancel{background:transparent;border:1px solid var(--border-light);color:var(--text-muted);}
+.tip-form-error{font-size:11px;color:#e85050;margin-bottom:8px;display:none;}
+
 .footer-note{
   text-align:center;font-size:11px;color:var(--text-dim);margin-top:30px;line-height:1.8;
 }
@@ -249,6 +280,8 @@ const FIELDS = [
 
 const REGION_ID = new URLSearchParams(window.location.search).get('id');
 let CURRENT_REGION = null;
+let ALL_TIPS = [];
+let MY_NAME = null;
 
 function escapeHtml(str){
   const div = document.createElement('div');
@@ -256,22 +289,35 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
+}
+
+async function getMyName(){
+  if(MY_NAME) return MY_NAME;
+  if(!window.CURRENT_UID) return '名無しさん';
+  const { data } = await _supabase.from('profiles').select('name').eq('id', window.CURRENT_UID).single();
+  MY_NAME = (data && data.name) ? data.name : '名無しさん';
+  return MY_NAME;
+}
+
 async function loadRegion(){
   if(!REGION_ID){
     document.getElementById('main-content').innerHTML = '<div class="loading-msg">部位が指定されていません</div>';
     return;
   }
-  const { data, error } = await _supabase
-    .from('technique_regions')
-    .select('*')
-    .eq('id', REGION_ID)
-    .single();
+  const [{ data, error }, tipsRes] = await Promise.all([
+    _supabase.from('technique_regions').select('*').eq('id', REGION_ID).single(),
+    _supabase.from('technique_tips').select('*').eq('region_id', REGION_ID).order('created_at', { ascending: true })
+  ]);
 
   if(error || !data){
     document.getElementById('main-content').innerHTML = '<div class="loading-msg">部位が見つかりませんでした</div>';
     return;
   }
   CURRENT_REGION = data;
+  ALL_TIPS = tipsRes.data || [];
 
   document.getElementById('top-title').textContent = data.name;
   if(data.parent_id){
@@ -309,9 +355,167 @@ function renderContent(){
       '①〜⑦を編集する' +
     '</button>' +
     itemsHtml +
+    buildTipSection('mistake', '⑧', 'よくある失敗例') +
+    buildTipSection('tip', '⑨', '手技のコツ') +
     '<div class="footer-note"><img src="assets/logo-icon-dark.png" alt="">K-PICS &nbsp;|&nbsp; 学びを、次の代へ。</div>';
 
   document.getElementById('open-edit-btn').addEventListener('click', openEditModal);
+}
+
+// ===================== ⑧⑨ 失敗例・コツ投稿 =====================
+let ADDING_TYPE = null;   // 'mistake' | 'tip' | null
+let EDITING_TIP_ID = null;
+
+function buildEditTipForm(t){
+  return (
+    '<div class="tip-form">' +
+      '<div class="tip-form-error" id="edit-error-' + t.id + '">保存に失敗しました</div>' +
+      '<textarea class="tip-textarea" id="edit-textarea-' + t.id + '" rows="3">' + escapeHtml(t.content) + '</textarea>' +
+      '<div class="tip-form-actions">' +
+        '<button class="tip-form-btn cancel" onclick="cancelEditTip()">キャンセル</button>' +
+        '<button class="tip-form-btn save" id="edit-save-' + t.id + '" onclick="saveEditTip(\'' + t.id + '\')">保存する</button>' +
+      '</div>' +
+    '</div>'
+  );
+}
+
+function buildTipSection(type, num, label){
+  const items = ALL_TIPS.filter(t => t.tip_type === type);
+
+  const itemsHtml = items.map(t => {
+    if(EDITING_TIP_ID === t.id) return buildEditTipForm(t);
+    const canEdit = window.CURRENT_UID && t.author_id === window.CURRENT_UID;
+    const actions = canEdit
+      ? '<div class="tip-card-actions">' +
+          '<button class="tip-card-action" onclick="startEditTip(\'' + t.id + '\')">編集</button>' +
+          '<button class="tip-card-action danger" onclick="deleteTip(\'' + t.id + '\')">削除</button>' +
+        '</div>'
+      : '';
+    return (
+      '<div class="tip-card">' +
+        '<div class="tip-card-text">' + escapeHtml(t.content) + '</div>' +
+        '<div class="tip-card-foot">' +
+          '<div class="tip-card-author">' + escapeHtml(t.author_name) + ' ・ ' + formatDate(t.created_at) + '</div>' +
+          actions +
+        '</div>' +
+      '</div>'
+    );
+  }).join('');
+
+  const emptyHtml = (items.length === 0 && ADDING_TYPE !== type)
+    ? '<div class="tip-empty">まだ投稿がありません</div>' : '';
+
+  const addForm = ADDING_TYPE === type
+    ? '<div class="tip-form">' +
+        '<div class="tip-form-error" id="add-error-' + type + '">投稿に失敗しました</div>' +
+        '<textarea class="tip-textarea" id="add-textarea-' + type + '" rows="3" placeholder="内容を入力してください"></textarea>' +
+        '<div class="tip-form-actions">' +
+          '<button class="tip-form-btn cancel" onclick="cancelAddTip()">キャンセル</button>' +
+          '<button class="tip-form-btn save" id="add-save-' + type + '" onclick="submitNewTip(\'' + type + '\')">投稿する</button>' +
+        '</div>' +
+      '</div>'
+    : '';
+
+  const addBtn = ADDING_TYPE === type
+    ? ''
+    : '<button class="tip-add-btn" onclick="openAddTip(\'' + type + '\')">＋ 追記する</button>';
+
+  return (
+    '<div class="tip-section">' +
+      '<div class="tip-section-head">' +
+        '<div class="tip-section-title"><span class="mono" style="color:var(--orange);">' + num + '</span>' + label + '</div>' +
+        addBtn +
+      '</div>' +
+      addForm + emptyHtml + itemsHtml +
+    '</div>'
+  );
+}
+
+function openAddTip(type){
+  ADDING_TYPE = type;
+  EDITING_TIP_ID = null;
+  renderContent();
+  setTimeout(() => { const ta = document.getElementById('add-textarea-' + type); if(ta) ta.focus(); }, 0);
+}
+function cancelAddTip(){ ADDING_TYPE = null; renderContent(); }
+
+async function submitNewTip(type){
+  const ta = document.getElementById('add-textarea-' + type);
+  const content = ta.value.trim();
+  const errEl = document.getElementById('add-error-' + type);
+  if(!content){
+    errEl.textContent = '内容を入力してください';
+    errEl.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('add-save-' + type);
+  btn.disabled = true; btn.textContent = '投稿中…';
+
+  const name = await getMyName();
+  const { error } = await _supabase.from('technique_tips').insert({
+    region_id: REGION_ID,
+    tip_type: type,
+    content: content,
+    author_name: name,
+    author_id: window.CURRENT_UID || null
+  });
+
+  if(error){
+    btn.disabled = false; btn.textContent = '投稿する';
+    errEl.textContent = '投稿に失敗しました：' + error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  ADDING_TYPE = null;
+  await reloadTips();
+  renderContent();
+}
+
+function startEditTip(id){ EDITING_TIP_ID = id; ADDING_TYPE = null; renderContent(); }
+function cancelEditTip(){ EDITING_TIP_ID = null; renderContent(); }
+
+async function saveEditTip(id){
+  const ta = document.getElementById('edit-textarea-' + id);
+  const content = ta.value.trim();
+  const errEl = document.getElementById('edit-error-' + id);
+  if(!content){
+    errEl.textContent = '内容を入力してください';
+    errEl.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('edit-save-' + id);
+  btn.disabled = true; btn.textContent = '保存中…';
+
+  const { error } = await _supabase.from('technique_tips').update({ content: content }).eq('id', id);
+
+  if(error){
+    btn.disabled = false; btn.textContent = '保存する';
+    errEl.textContent = '保存に失敗しました：' + error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  EDITING_TIP_ID = null;
+  await reloadTips();
+  renderContent();
+}
+
+async function deleteTip(id){
+  if(!confirm('この投稿を削除しますか？')) return;
+  const { error } = await _supabase.from('technique_tips').delete().eq('id', id);
+  if(error){ alert('削除に失敗しました：' + error.message); return; }
+  await reloadTips();
+  renderContent();
+}
+
+async function reloadTips(){
+  const { data } = await _supabase
+    .from('technique_tips')
+    .select('*')
+    .eq('region_id', REGION_ID)
+    .order('created_at', { ascending: true });
+  ALL_TIPS = data || [];
 }
 
 // ===================== 編集モーダル =====================
