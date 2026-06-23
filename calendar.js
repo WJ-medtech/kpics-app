@@ -176,13 +176,13 @@ function openDetail(id){
     ${e.description ? `<div class="detail-desc">${escapeHtml(e.description)}</div>` : ''}
     ${e.created_by_name ? `<div class="detail-created">登録: ${escapeHtml(e.created_by_name)}</div>` : ''}
     <div class="imp-section">
-      <div class="imp-label">感想</div>
+      <div class="imp-label">感想・学んだこと</div>
       <div class="imp-list" id="imp-list-${id}">
         <div class="empty-state" style="padding:14px 0;">読み込み中...</div>
       </div>
       <div class="imp-form">
         <div class="imp-input-row">
-          <textarea class="imp-input" id="imp-input-${id}" rows="1" placeholder="参加した感想を書いてみよう"></textarea>
+          <textarea class="imp-input" id="imp-input-${id}" rows="1" placeholder="どんなイベントだったか、学んだことを書いてみよう"></textarea>
           <button class="imp-send" onclick="submitImpression('${id}')" aria-label="送信">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
           </button>
@@ -242,7 +242,7 @@ function renderImpressions(eventId, impressions){
   const listEl = document.getElementById('imp-list-'+eventId);
   if(!listEl) return;
   if(impressions.length === 0){
-    listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-dim);padding:2px 0 4px;">まだ感想はありません</div>`;
+    listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-dim);padding:2px 0 4px;">まだ感想・学びの記録はありません</div>`;
     return;
   }
   listEl.innerHTML = impressions.map(imp => {

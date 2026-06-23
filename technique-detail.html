@@ -379,7 +379,7 @@ function renderContent(){
           '<div class="item-card-num mono">' + f.num + '</div>' +
           '<div class="item-card-label">' + f.label + '</div>' +
         '</div>' +
-        buildFieldImageSection(f.key, null) +
+        buildFieldImageSection(f.key, null, false) +
         '<div class="' + bodyClass + '">' + bodyText + '</div>' +
       '</div>'
     );
@@ -409,7 +409,7 @@ let EDITING_TIP_ID = null;
 function buildEditTipForm(t){
   return (
     '<div class="tip-card">' +
-      buildFieldImageSection(t.tip_type, t.id) +
+      buildFieldImageSection(t.tip_type, t.id, true) +
       '<div class="tip-form" style="margin-bottom:0;">' +
         '<div class="tip-form-error" id="edit-error-' + t.id + '">保存に失敗しました</div>' +
         '<textarea class="tip-textarea" id="edit-textarea-' + t.id + '" rows="3">' + escapeHtml(t.content) + '</textarea>' +
@@ -436,7 +436,7 @@ function buildTipSection(type, num, label){
       : '';
     return (
       '<div class="tip-card">' +
-        buildFieldImageSection(t.tip_type, t.id) +
+        buildFieldImageSection(t.tip_type, t.id, false) +
         '<div class="tip-card-text">' + escapeHtml(t.content) + '</div>' +
         '<div class="tip-card-foot">' +
           '<div class="tip-card-author">' + escapeHtml(t.author_name) + ' ・ ' + formatDate(t.created_at) + '</div>' +
@@ -578,26 +578,32 @@ async function reloadImagesAndUrls(){
   }));
 }
 
-function buildFieldImageSection(fieldKey, tipId){
+function buildFieldImageSection(fieldKey, tipId, editable, context){
   const imgs = ALL_IMAGES.filter(i => i.field_key === fieldKey && (i.tip_id || null) === (tipId || null));
   const targetId = fieldKey + (tipId ? '_' + tipId : '');
+  const sectionId = (context === 'modal' ? 'modal-imgsec-' : 'imgsec-') + targetId;
 
   const itemsHtml = imgs.map(img => {
     const url = IMAGE_URL_MAP[img.storage_path] || '';
+    const delBtn = editable
+      ? '<button class="field-img-del" onclick="event.stopPropagation();deleteFieldImage(\'' + img.id + '\',\'' + img.storage_path + '\')">&times;</button>'
+      : '';
     return (
       '<div class="field-img-item">' +
         '<img src="' + url + '" alt="" onclick="openLightbox(\'' + url + '\')">' +
-        '<button class="field-img-del" onclick="event.stopPropagation();deleteFieldImage(\'' + img.id + '\',\'' + img.storage_path + '\')">&times;</button>' +
+        delBtn +
       '</div>'
     );
   }).join('');
 
-  const addBtn = imgs.length < 3
+  const addBtn = (editable && imgs.length < 3)
     ? '<button class="field-img-add-btn" onclick="startImageUpload(\'' + fieldKey + '\',' + (tipId ? "'" + tipId + "'" : 'null') + ')">＋ 画像を追加（' + imgs.length + '/3）</button>'
     : '';
 
+  if(!itemsHtml && !addBtn) return '';
+
   return (
-    '<div class="field-img-section">' +
+    '<div class="field-img-section" id="' + sectionId + '">' +
       (itemsHtml ? '<div class="field-img-list">' + itemsHtml + '</div>' : '') +
       '<div class="field-img-uploading" id="img-uploading-' + targetId + '" style="display:none;">アップロード中…</div>' +
       addBtn +
@@ -648,15 +654,24 @@ document.getElementById('image-file-input').addEventListener('change', async () 
 
   await reloadImagesAndUrls();
   renderContent();
+  if(!tipId && document.getElementById('edit-modal').classList.contains('show')){
+    const sec = document.getElementById('modal-imgsec-' + fieldKey);
+    if(sec) sec.outerHTML = buildFieldImageSection(fieldKey, null, true, 'modal');
+  }
 });
 
 async function deleteFieldImage(id, path){
   if(!confirm('この画像を削除しますか？')) return;
+  const img = ALL_IMAGES.find(i => i.id === id);
   await _supabase.storage.from('technique-images').remove([path]);
   await _supabase.from('technique_images').delete().eq('id', id);
   delete IMAGE_URL_MAP[path];
   await reloadImagesAndUrls();
   renderContent();
+  if(img && !img.tip_id && document.getElementById('edit-modal').classList.contains('show')){
+    const sec = document.getElementById('modal-imgsec-' + img.field_key);
+    if(sec) sec.outerHTML = buildFieldImageSection(img.field_key, null, true, 'modal');
+  }
 }
 
 function openLightbox(url){
@@ -676,6 +691,7 @@ function openEditModal(){
     return (
       '<div class="modal-field">' +
         '<div class="modal-label"><span class="num mono">' + f.num + '</span>' + f.label + '</div>' +
+        buildFieldImageSection(f.key, null, true, 'modal') +
         '<textarea class="modal-textarea" data-key="' + f.key + '" rows="3">' + escapeHtml(val) + '</textarea>' +
       '</div>'
     );

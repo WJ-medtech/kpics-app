@@ -212,7 +212,7 @@ button{font-family:inherit;}
   </button>
 
   <div class="doc-note">
-    <strong>使い方：</strong>疾患をタップすると詳しい内容が見れます。①〜⑥の内容は詳細ページの「編集する」から誰でも書き込み・修正できます。左の「⠿」を長押し（ドラッグ）すると並び替えができます。
+    <strong>使い方：</strong>疾患をタップすると詳しい内容が見れます。①〜⑦の内容は詳細ページの「編集する」から誰でも書き込み・修正できます。左の「⠿」を長押し（ドラッグ）すると並び替えができます。
   </div>
 
   <div class="footer-note">
@@ -307,7 +307,7 @@ function renderList(){
         '<div class="disease-card-num mono">' + String(i+1).padStart(2,'0') + '</div>' +
         '<a class="disease-card-body" href="disease-detail.html?id=' + d.id + '">' +
           '<div class="disease-card-name">' + escapeHtml(d.name) + '</div>' +
-          '<div class="disease-card-sub">①〜⑥の詳細を見る</div>' +
+          '<div class="disease-card-sub">①〜⑦の詳細を見る</div>' +
         '</a>' +
         '<div class="disease-card-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>' +
       '</div>'
