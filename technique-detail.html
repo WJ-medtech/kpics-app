@@ -147,7 +147,7 @@ button{font-family:inherit;}
 
 /* 編集モーダル */
 .modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;
   display:none;align-items:flex-end;justify-content:center;
   backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
 }
@@ -184,6 +184,33 @@ button{font-family:inherit;}
 }
 .modal-save-btn:disabled{opacity:.5;}
 .modal-error{font-size:11.5px;color:#e85050;margin-bottom:10px;display:none;text-align:center;}
+
+/* ①〜⑨ 画像セクション */
+.field-img-section{padding-left:36px;margin-bottom:10px;}
+.tip-card .field-img-section{padding-left:0;margin-bottom:10px;}
+.field-img-list{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.field-img-item{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--black);}
+.field-img-item img{width:100%;display:block;cursor:zoom-in;max-height:280px;object-fit:cover;}
+.field-img-del{
+  position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;
+  background:rgba(0,0,0,.65);color:#fff;border:none;font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.field-img-add-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
+  background:var(--orange-bg);border:1px dashed rgba(232,160,32,.35);color:var(--orange);
+  border-radius:9px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;
+}
+.field-img-add-btn:hover{background:rgba(232,160,32,.16);}
+.field-img-uploading{font-size:11px;color:var(--text-muted);padding:4px 2px 8px;}
+
+/* 画像拡大表示（ライトボックス） */
+.lightbox-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:600;
+  display:none;align-items:center;justify-content:center;padding:24px;
+}
+.lightbox-overlay.show{display:flex;}
+.lightbox-overlay img{max-width:100%;max-height:100%;border-radius:10px;}
 
 /* 下部タブバー */
 .tabbar{
@@ -238,6 +265,14 @@ button{font-family:inherit;}
   </div>
 </div>
 
+<!-- 画像アップロード用（非表示） -->
+<input type="file" id="image-file-input" accept="image/*" style="display:none;">
+
+<!-- 画像拡大表示 -->
+<div class="lightbox-overlay" id="lightbox-overlay">
+  <img id="lightbox-img" src="" alt="">
+</div>
+
 <!-- 下部タブバー -->
 <nav class="tabbar" id="main-tabbar">
   <a class="tabbar-item" data-tab="home" href="index.html">
@@ -282,6 +317,9 @@ const REGION_ID = new URLSearchParams(window.location.search).get('id');
 let CURRENT_REGION = null;
 let ALL_TIPS = [];
 let MY_NAME = null;
+let ALL_IMAGES = [];
+let IMAGE_URL_MAP = {};
+let CURRENT_UPLOAD_TARGET = null;
 
 function escapeHtml(str){
   const div = document.createElement('div');
@@ -318,6 +356,7 @@ async function loadRegion(){
   }
   CURRENT_REGION = data;
   ALL_TIPS = tipsRes.data || [];
+  await reloadImagesAndUrls();
 
   document.getElementById('top-title').textContent = data.name;
   if(data.parent_id){
@@ -340,6 +379,7 @@ function renderContent(){
           '<div class="item-card-num mono">' + f.num + '</div>' +
           '<div class="item-card-label">' + f.label + '</div>' +
         '</div>' +
+        buildFieldImageSection(f.key, null) +
         '<div class="' + bodyClass + '">' + bodyText + '</div>' +
       '</div>'
     );
@@ -368,12 +408,15 @@ let EDITING_TIP_ID = null;
 
 function buildEditTipForm(t){
   return (
-    '<div class="tip-form">' +
-      '<div class="tip-form-error" id="edit-error-' + t.id + '">保存に失敗しました</div>' +
-      '<textarea class="tip-textarea" id="edit-textarea-' + t.id + '" rows="3">' + escapeHtml(t.content) + '</textarea>' +
-      '<div class="tip-form-actions">' +
-        '<button class="tip-form-btn cancel" onclick="cancelEditTip()">キャンセル</button>' +
-        '<button class="tip-form-btn save" id="edit-save-' + t.id + '" onclick="saveEditTip(\'' + t.id + '\')">保存する</button>' +
+    '<div class="tip-card">' +
+      buildFieldImageSection(t.tip_type, t.id) +
+      '<div class="tip-form" style="margin-bottom:0;">' +
+        '<div class="tip-form-error" id="edit-error-' + t.id + '">保存に失敗しました</div>' +
+        '<textarea class="tip-textarea" id="edit-textarea-' + t.id + '" rows="3">' + escapeHtml(t.content) + '</textarea>' +
+        '<div class="tip-form-actions">' +
+          '<button class="tip-form-btn cancel" onclick="cancelEditTip()">キャンセル</button>' +
+          '<button class="tip-form-btn save" id="edit-save-' + t.id + '" onclick="saveEditTip(\'' + t.id + '\')">保存する</button>' +
+        '</div>' +
       '</div>' +
     '</div>'
   );
@@ -393,6 +436,7 @@ function buildTipSection(type, num, label){
       : '';
     return (
       '<div class="tip-card">' +
+        buildFieldImageSection(t.tip_type, t.id) +
         '<div class="tip-card-text">' + escapeHtml(t.content) + '</div>' +
         '<div class="tip-card-foot">' +
           '<div class="tip-card-author">' + escapeHtml(t.author_name) + ' ・ ' + formatDate(t.created_at) + '</div>' +
@@ -517,6 +561,113 @@ async function reloadTips(){
     .order('created_at', { ascending: true });
   ALL_TIPS = data || [];
 }
+
+// ===================== ①〜⑨ 画像 =====================
+async function reloadImagesAndUrls(){
+  const { data } = await _supabase
+    .from('technique_images')
+    .select('*')
+    .eq('region_id', REGION_ID)
+    .order('display_order', { ascending: true });
+  ALL_IMAGES = data || [];
+
+  await Promise.all(ALL_IMAGES.map(async img => {
+    if(IMAGE_URL_MAP[img.storage_path]) return;
+    const { data: sd } = await _supabase.storage.from('technique-images').createSignedUrl(img.storage_path, 3600);
+    if(sd) IMAGE_URL_MAP[img.storage_path] = sd.signedUrl;
+  }));
+}
+
+function buildFieldImageSection(fieldKey, tipId){
+  const imgs = ALL_IMAGES.filter(i => i.field_key === fieldKey && (i.tip_id || null) === (tipId || null));
+  const targetId = fieldKey + (tipId ? '_' + tipId : '');
+
+  const itemsHtml = imgs.map(img => {
+    const url = IMAGE_URL_MAP[img.storage_path] || '';
+    return (
+      '<div class="field-img-item">' +
+        '<img src="' + url + '" alt="" onclick="openLightbox(\'' + url + '\')">' +
+        '<button class="field-img-del" onclick="event.stopPropagation();deleteFieldImage(\'' + img.id + '\',\'' + img.storage_path + '\')">&times;</button>' +
+      '</div>'
+    );
+  }).join('');
+
+  const addBtn = imgs.length < 3
+    ? '<button class="field-img-add-btn" onclick="startImageUpload(\'' + fieldKey + '\',' + (tipId ? "'" + tipId + "'" : 'null') + ')">＋ 画像を追加（' + imgs.length + '/3）</button>'
+    : '';
+
+  return (
+    '<div class="field-img-section">' +
+      (itemsHtml ? '<div class="field-img-list">' + itemsHtml + '</div>' : '') +
+      '<div class="field-img-uploading" id="img-uploading-' + targetId + '" style="display:none;">アップロード中…</div>' +
+      addBtn +
+    '</div>'
+  );
+}
+
+function startImageUpload(fieldKey, tipId){
+  CURRENT_UPLOAD_TARGET = { fieldKey: fieldKey, tipId: tipId };
+  document.getElementById('image-file-input').click();
+}
+
+document.getElementById('image-file-input').addEventListener('change', async () => {
+  const fileInput = document.getElementById('image-file-input');
+  const file = fileInput.files[0];
+  fileInput.value = '';
+  if(!file || !CURRENT_UPLOAD_TARGET) return;
+
+  const fieldKey = CURRENT_UPLOAD_TARGET.fieldKey;
+  const tipId = CURRENT_UPLOAD_TARGET.tipId;
+  const existing = ALL_IMAGES.filter(i => i.field_key === fieldKey && (i.tip_id || null) === (tipId || null));
+  if(existing.length >= 3){ alert('画像は3枚まで追加できます'); return; }
+
+  const targetId = fieldKey + (tipId ? '_' + tipId : '');
+  const uploadingEl = document.getElementById('img-uploading-' + targetId);
+  if(uploadingEl) uploadingEl.style.display = 'block';
+
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = REGION_ID + '/' + targetId + '/' + Date.now() + '.' + ext;
+
+  const { error: upErr } = await _supabase.storage.from('technique-images').upload(path, file);
+  if(upErr){
+    alert('アップロードに失敗しました：' + upErr.message);
+    if(uploadingEl) uploadingEl.style.display = 'none';
+    return;
+  }
+
+  const { error: insErr } = await _supabase.from('technique_images').insert({
+    region_id: REGION_ID,
+    field_key: fieldKey,
+    tip_id: tipId,
+    storage_path: path,
+    display_order: existing.length
+  });
+  if(insErr){
+    alert('登録に失敗しました：' + insErr.message);
+  }
+
+  await reloadImagesAndUrls();
+  renderContent();
+});
+
+async function deleteFieldImage(id, path){
+  if(!confirm('この画像を削除しますか？')) return;
+  await _supabase.storage.from('technique-images').remove([path]);
+  await _supabase.from('technique_images').delete().eq('id', id);
+  delete IMAGE_URL_MAP[path];
+  await reloadImagesAndUrls();
+  renderContent();
+}
+
+function openLightbox(url){
+  if(!url) return;
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox-overlay').classList.add('show');
+}
+document.getElementById('lightbox-overlay').addEventListener('click', () => {
+  document.getElementById('lightbox-overlay').classList.remove('show');
+  document.getElementById('lightbox-img').src = '';
+});
 
 // ===================== 編集モーダル =====================
 function openEditModal(){
