@@ -96,7 +96,10 @@ resetIdleTimer();
 window.CURRENT_UID  = null;
 window.CURRENT_ROLE = 'member';
 
-_supabase.auth.onAuthStateChange(async (event, session) => {
+let _authResolved = false; // ログイン状態の判定が一度でも完了したか
+
+async function applySessionState(session){
+  _authResolved = true;
   if(session && session.user){
     const user = session.user;
     const {data:profile} = await _supabase.from('profiles').select('*').eq('id', user.id).single();
@@ -124,10 +127,29 @@ _supabase.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('auth-screen').classList.add('active');
     hideSplash();
   }
+}
+
+// 起動時に一度、現在のログイン状態を直接確認する。
+// （onAuthStateChangeの発火だけに頼ると、通信が遅い時に画面の判定が
+//   いつまでも終わらず「真っ黒」になることがあるため、明示的に確認する）
+_supabase.auth.getSession().then(({data:{session}})=>{
+  applySessionState(session);
 });
 
-// 万一 Supabase からの応答が遅れた場合の保険（最大3秒でスプラッシュを閉じる）
-setTimeout(hideSplash, 3000);
+// ログイン・ログアウトなど、状態が変化した時の処理
+_supabase.auth.onAuthStateChange((event, session) => {
+  applySessionState(session);
+});
+
+// 最終保険：4秒経っても上記の判定が一度も完了していない場合は、
+// 通信トラブル等が起きているとみなし、ひとまずログイン画面を表示する
+// （本当はログイン済みだった場合は、判定が完了した時点で自動的にホーム画面に切り替わる）
+setTimeout(()=>{
+  hideSplash();
+  if(!_authResolved){
+    document.getElementById('auth-screen').classList.add('active');
+  }
+}, 4000);
 
 // ---------- PWA: ホーム画面に追加した時に正しく動くようにする ----------
 if('serviceWorker' in navigator){
