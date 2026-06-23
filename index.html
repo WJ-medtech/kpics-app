@@ -152,9 +152,11 @@ button{font-family:inherit;}
   background:var(--black);
 }
 
-/* 反転中は裏面のスクロールを無効化、表示中のみ操作可 */
-.flip-card.is-flipped .flip-face-front{visibility:hidden;}
-.flip-card:not(.is-flipped) .flip-face-back{visibility:hidden;}
+/* 反転中は裏面のスクロールを無効化、表示中のみ操作可
+   ※ display:none にすることで「見えてない方の面」が
+   ページの縦スクロール範囲に含まれなくなる（無限スクロール対策） */
+.flip-card.is-flipped .flip-face-front{display:none;}
+.flip-card:not(.is-flipped) .flip-face-back{display:none;}
 
 /* ===== 反転ボタン（アイコン＋テキストのピル型） ===== */
 .flip-toggle{
@@ -171,6 +173,22 @@ button{font-family:inherit;}
 .flip-toggle .ft-text{
   font-family:"Bebas Neue",sans-serif;font-size:12.5px;letter-spacing:.04em;
   white-space:nowrap;
+}
+
+/* ===== 反転ボタンの説明吹き出し（初回のみ表示） ===== */
+.flip-hint{
+  position:fixed;top:calc(54px + env(safe-area-inset-top));right:16px;z-index:119;
+  max-width:188px;background:var(--dark);border:1px solid var(--orange);border-radius:11px;
+  padding:10px 13px;font-size:11.5px;color:var(--text);line-height:1.55;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  opacity:0;transform:translateY(-6px);
+  transition:opacity .35s ease, transform .35s ease;
+  pointer-events:none;cursor:pointer;
+}
+.flip-hint.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+.flip-hint::before{
+  content:"";position:absolute;top:-6px;right:18px;width:0;height:0;
+  border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:6px solid var(--orange);
 }
 
 .home-header{
@@ -465,9 +483,34 @@ button{font-family:inherit;}
 /* コンテンツカード（ポータルの各リソース） */
 .portal-card{
   background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:18px 18px 20px;margin-bottom:10px;
+  padding:18px 18px 20px;margin-bottom:10px;position:relative;
 }
 .portal-card.disabled{opacity:.6;}
+.portal-card.add-card{
+  border-style:dashed;border-color:var(--border-light);background:transparent;
+  cursor:pointer;transition:all .15s;
+}
+.portal-card.add-card:hover{background:var(--orange-bg);border-color:var(--orange);}
+.portal-card.add-card .portal-card-icon{
+  background:transparent;border:1px dashed var(--border-light);color:var(--text-muted);
+  font-size:18px;font-weight:700;
+}
+.portal-card.add-card:hover .portal-card-icon{border-color:var(--orange);color:var(--orange);}
+.portal-card.add-card .portal-card-desc{color:var(--text-dim);}
+.portal-card-del{
+  position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:7px;
+  background:var(--black);border:1px solid var(--border-light);color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;
+  transition:all .15s;
+}
+.portal-card-del:hover{border-color:#F06060;color:#F06060;}
+.menu-card-del{
+  position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:6px;
+  background:var(--black);border:1px solid var(--border-light);color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;
+  transition:all .15s;
+}
+.menu-card-del:hover{border-color:#F06060;color:#F06060;}
 .portal-card-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
 .portal-card-icon{
   width:38px;height:38px;border-radius:10px;background:var(--orange-bg);
@@ -609,9 +652,10 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
 
   <!-- 右上の反転ボタン -->
   <button class="flip-toggle" id="flip-toggle-btn" onclick="toggleFlip()" aria-label="ポータルを見る">
-    <svg id="flip-icon-to-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17v-6h-6"/><path d="M21 11a9 9 0 00-15-6.7L3 7"/><path d="M3 13a9 9 0 0015 6.7l3-2.7"/></svg>
+    <svg id="flip-icon-to-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="13" rx="3"/><path d="M16.5 9.2a5 5 0 0 1 4 4.8"/><path d="M21 11.3l1 3-3-.6"/></svg>
     <span class="ft-text" id="flip-toggle-text">ポータル</span>
   </button>
+  <div class="flip-hint" id="flip-hint" onclick="dismissFlipHint()">👆 タップすると、読み物形式の「ポータル」ページに切り替わります</div>
 
   <div class="flip-scene">
     <div class="flip-card" id="flip-card">
@@ -743,13 +787,57 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
               <div class="menu-icon">🧠</div>
               <div class="menu-body">
                 <div class="menu-title">POCUS特化臨床推論 <span class="badge-soon">検討中</span></div>
-                <div class="menu-desc">勉強会の開催案内・過去の良問ストック</div>
+                <div class="menu-desc">全国展開アプリ制作予定</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-label">救急医療<span class="badge-soon">今後追加予定</span></div>
+          <div class="menu-group" data-section="emergency">
+            <div class="menu-card add-card" onclick="openAddLinkModal('emergency')" role="button" tabindex="0">
+              <div class="menu-icon">＋</div>
+              <div class="menu-body">
+                <div class="menu-title">項目を追加する</div>
+                <div class="menu-desc">部員が自由にリンクを追加できます</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-label">BLS<span class="badge-soon">今後追加予定</span></div>
+          <div class="menu-group" data-section="bls">
+            <div class="menu-card add-card" onclick="openAddLinkModal('bls')" role="button" tabindex="0">
+              <div class="menu-icon">＋</div>
+              <div class="menu-body">
+                <div class="menu-title">項目を追加する</div>
+                <div class="menu-desc">部員が自由にリンクを追加できます</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-label">災害医療<span class="badge-soon">今後追加予定</span></div>
+          <div class="menu-group" data-section="disaster">
+            <div class="menu-card add-card" onclick="openAddLinkModal('disaster')" role="button" tabindex="0">
+              <div class="menu-icon">＋</div>
+              <div class="menu-body">
+                <div class="menu-title">項目を追加する</div>
+                <div class="menu-desc">部員が自由にリンクを追加できます</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-label">地域医療<span class="badge-soon">今後追加予定</span></div>
+          <div class="menu-group" data-section="community">
+            <div class="menu-card add-card" onclick="openAddLinkModal('community')" role="button" tabindex="0">
+              <div class="menu-icon">＋</div>
+              <div class="menu-body">
+                <div class="menu-title">項目を追加する</div>
+                <div class="menu-desc">部員が自由にリンクを追加できます</div>
               </div>
             </div>
           </div>
 
           <div class="sec-label">その他</div>
-          <div class="menu-group">
+          <div class="menu-group" data-section="other">
             <a class="menu-card" href="https://wj-medtech.github.io/fast_journey/" target="_blank" rel="noopener">
               <div class="menu-icon">🧭</div>
               <div class="menu-body">
@@ -765,7 +853,7 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
                 <div class="menu-desc">構想段階のコンテンツです</div>
               </div>
             </div>
-            <div class="menu-card add-card" onclick="alert('この機能は近日対応予定です')" role="button" tabindex="0">
+            <div class="menu-card add-card" onclick="openAddLinkModal('other')" role="button" tabindex="0">
               <div class="menu-icon">＋</div>
               <div class="menu-body">
                 <div class="menu-title">項目を追加する</div>
@@ -971,9 +1059,69 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
             </div>
           </div>
 
-          <!-- 05 その他コンテンツ -->
+          <!-- 05 救急医療 -->
           <div class="back-section reveal">
-            <div class="back-eyebrow">05 · More</div>
+            <div class="back-eyebrow">05 · Emergency</div>
+            <div class="back-h2">救急医療 <span class="portal-card-tag muted">今後追加予定</span></div>
+            <div class="portal-card-list" data-section="emergency">
+              <div class="portal-card add-card" onclick="openAddLinkModal('emergency')" role="button" tabindex="0">
+                <div class="portal-card-head">
+                  <div class="portal-card-icon">＋</div>
+                  <div class="portal-card-title">項目を追加する</div>
+                </div>
+                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 06 BLS -->
+          <div class="back-section reveal">
+            <div class="back-eyebrow">06 · BLS</div>
+            <div class="back-h2">BLS <span class="portal-card-tag muted">今後追加予定</span></div>
+            <div class="portal-card-list" data-section="bls">
+              <div class="portal-card add-card" onclick="openAddLinkModal('bls')" role="button" tabindex="0">
+                <div class="portal-card-head">
+                  <div class="portal-card-icon">＋</div>
+                  <div class="portal-card-title">項目を追加する</div>
+                </div>
+                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 07 災害医療 -->
+          <div class="back-section reveal">
+            <div class="back-eyebrow">07 · Disaster Medicine</div>
+            <div class="back-h2">災害医療 <span class="portal-card-tag muted">今後追加予定</span></div>
+            <div class="portal-card-list" data-section="disaster">
+              <div class="portal-card add-card" onclick="openAddLinkModal('disaster')" role="button" tabindex="0">
+                <div class="portal-card-head">
+                  <div class="portal-card-icon">＋</div>
+                  <div class="portal-card-title">項目を追加する</div>
+                </div>
+                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 08 地域医療 -->
+          <div class="back-section reveal">
+            <div class="back-eyebrow">08 · Community Medicine</div>
+            <div class="back-h2">地域医療 <span class="portal-card-tag muted">今後追加予定</span></div>
+            <div class="portal-card-list" data-section="community">
+              <div class="portal-card add-card" onclick="openAddLinkModal('community')" role="button" tabindex="0">
+                <div class="portal-card-head">
+                  <div class="portal-card-icon">＋</div>
+                  <div class="portal-card-title">項目を追加する</div>
+                </div>
+                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 09 その他コンテンツ -->
+          <div class="back-section reveal">
+            <div class="back-eyebrow">09 · More</div>
             <div class="back-h2">その他</div>
 
             <div class="portal-card">
@@ -993,6 +1141,16 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
                 <div class="portal-card-title">解剖VR <span class="portal-card-tag muted">未定</span></div>
               </div>
               <div class="portal-card-desc">構想段階のコンテンツです。詳細は未定です。</div>
+            </div>
+
+            <div class="portal-card-list" data-section="other">
+              <div class="portal-card add-card" onclick="openAddLinkModal('other')" role="button" tabindex="0">
+                <div class="portal-card-head">
+                  <div class="portal-card-icon">＋</div>
+                  <div class="portal-card-title">項目を追加する</div>
+                </div>
+                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
+              </div>
             </div>
           </div>
 
@@ -1182,8 +1340,35 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
   </div>
 </div>
 
+<!-- 項目を追加するモーダル -->
+<div class="guide-overlay" id="addlink-overlay" onclick="closeAddLinkOnOverlay(event)">
+  <div class="guide-box" style="max-width:420px;">
+    <div class="guide-head">
+      <div class="guide-title">項目を追加する</div>
+      <button class="guide-close" onclick="closeAddLinkModal()" aria-label="閉じる">✕</button>
+    </div>
+    <div class="guide-sub" id="addlink-section-label" style="margin-bottom:18px;"></div>
+
+    <div class="auth-field-label" style="margin-top:0;">タイトル <span style="color:#F06060;">*</span></div>
+    <input class="field" type="text" id="addlink-title" placeholder="例：JATECコース申込ページ">
+
+    <div class="auth-field-label">リンク先URL <span style="color:#F06060;">*</span></div>
+    <input class="field" type="url" id="addlink-url" placeholder="https://...">
+
+    <div class="auth-field-label">アイコン（絵文字・省略可）</div>
+    <input class="field" type="text" id="addlink-icon" placeholder="🚑" maxlength="4">
+
+    <div class="auth-field-label">説明（省略可）</div>
+    <input class="field" type="text" id="addlink-desc" placeholder="ひとこと説明">
+
+    <div class="auth-error" id="addlink-error"></div>
+    <button class="auth-btn" id="addlink-submit-btn" onclick="submitAddLink()" style="margin-top:18px;">追加する</button>
+  </div>
+</div>
+
 <script src="app.js"></script>
 <script src="tabbar.js"></script>
+<script src="custom-links.js"></script>
 <script>
 // ===================== K-PICSの部員として：自主練注意事項モーダル =====================
 function openGuideModal(){
@@ -1202,6 +1387,7 @@ function toggleFlip(){
   _isFlipped = !_isFlipped;
   const card = document.getElementById('flip-card');
   card.classList.toggle('is-flipped', _isFlipped);
+  dismissFlipHint();
 
   // 反転後に見える面を必ず先頭から表示する
   const targetFace = _isFlipped
@@ -1247,6 +1433,26 @@ function setupRevealObserver(){
   targets.forEach(el => _revealObserver.observe(el));
 }
 window.addEventListener('DOMContentLoaded', setupRevealObserver);
+
+// ===================== ポータルボタンの説明吹き出し（初回のみ） =====================
+const FLIP_HINT_KEY = 'kpics_flip_hint_seen_v1';
+function dismissFlipHint(){
+  const hint = document.getElementById('flip-hint');
+  if(!hint) return;
+  hint.classList.remove('show');
+  try{ localStorage.setItem(FLIP_HINT_KEY, '1'); }catch(e){}
+}
+(function initFlipHint(){
+  let seen = false;
+  try{ seen = !!localStorage.getItem(FLIP_HINT_KEY); }catch(e){}
+  if(seen) return;
+  window.addEventListener('DOMContentLoaded', function(){
+    const hint = document.getElementById('flip-hint');
+    if(!hint) return;
+    setTimeout(()=> hint.classList.add('show'), 1000);
+    setTimeout(dismissFlipHint, 7000);
+  });
+})();
 
 // ===================== 画面が必ず最上部から表示されるようにする =====================
 // PWA起動時・ホーム画面復帰時などにスクロール位置がズレてヘッダーが
