@@ -4,19 +4,27 @@
 // テーブル構成（Supabase側で作成する想定）：
 //   questions        : id, user_id, is_anonymous, content, created_at
 //   question_replies : id, question_id, user_id, is_anonymous, content, created_at
+//   profiles         : id, name, role, is_teacher, is_core_member, is_certified
 //
 // 名前の表示ルール：
-//   is_anonymous = true  → 「匿名」と表示
-//   is_anonymous = false → profilesテーブルのnameを表示
+//   is_anonymous = true  → 「匿名」と表示（バッジも非表示）
+//   is_anonymous = false → profilesテーブルのnameを表示（バッジも表示）
+//
+// 削除ルール：
+//   ・自分の投稿・コメントは本人がいつでも削除できる
+//   ・コアメンバー（is_core_member）は、誰の投稿・コメントでも削除できる
 
 let _myName = '';
+let _myIsCore = false;
 let _questionsCache = []; // 取得した質問をキャッシュしておく（コメント開閉時の再取得を避けるため）
+let _badgeMap = {}; // user_id -> {is_teacher, is_core_member, is_certified}（取得済みバッジのキャッシュ）
 
-// ---------- 初期化：自分の名前を取得してから質問一覧を読み込む ----------
+// ---------- 初期化：自分の名前・権限を取得してから質問一覧を読み込む ----------
 async function initQuestionsPage(){
   if(window.CURRENT_UID){
-    const {data:profile} = await _supabase.from('profiles').select('name').eq('id', window.CURRENT_UID).single();
+    const {data:profile} = await _supabase.from('profiles').select('name,is_core_member').eq('id', window.CURRENT_UID).single();
     _myName = profile?.name || '';
+    _myIsCore = !!profile?.is_core_member;
   }
   await loadQuestions();
 }
@@ -31,6 +39,33 @@ function waitForAuthThenInit(){
   }
 }
 window.addEventListener('DOMContentLoaded', waitForAuthThenInit);
+
+// ---------- バッジ情報の取得（未取得のユーザーIDだけ問い合わせる） ----------
+async function ensureBadges(userIds){
+  const need = [...new Set(userIds)].filter(id => id && !(id in _badgeMap));
+  if(need.length === 0) return;
+  const {data, error} = await _supabase
+    .from('profiles')
+    .select('id,is_teacher,is_core_member,is_certified')
+    .in('id', need);
+  if(error){ console.error('バッジ取得エラー', error); return; }
+  (data || []).forEach(p => { _badgeMap[p.id] = p; });
+}
+
+function getBadgesHtml(userId, isAnonymous){
+  if(isAnonymous) return ''; // 匿名投稿はバッジも非表示にする
+  const b = _badgeMap[userId];
+  if(!b) return '';
+  let html = '';
+  if(b.is_teacher)     html += `<span class="q-badge b-teacher">先生</span>`;
+  if(b.is_core_member) html += `<span class="q-badge b-core">コア</span>`;
+  if(b.is_certified)   html += `<span class="q-badge b-certified">認定</span>`;
+  return html ? `<span class="q-badges">${html}</span>` : '';
+}
+
+function canDelete(ownerId){
+  return ownerId === window.CURRENT_UID || _myIsCore;
+}
 
 // ---------- 質問一覧の読み込み ----------
 async function loadQuestions(){
@@ -49,6 +84,7 @@ async function loadQuestions(){
     listEl.innerHTML = `<div class="empty-state">まだ質問がありません。<br>右下の＋ボタンから最初の質問を投稿してみましょう。</div>`;
     return;
   }
+  await ensureBadges(_questionsCache.map(q => q.user_id));
   renderQuestions();
 }
 
@@ -61,11 +97,16 @@ function renderQuestionCard(q){
   const displayName = q.is_anonymous ? '匿名' : (q.author_name || '部員');
   const initial = q.is_anonymous ? '?' : (displayName ? displayName[0] : '?');
   const anonClass = q.is_anonymous ? 'anon' : '';
+  const badgesHtml = getBadgesHtml(q.user_id, q.is_anonymous);
+  const delBtnHtml = canDelete(q.user_id)
+    ? `<button class="q-delete-btn" onclick="deleteQuestion('${q.id}')">削除</button>`
+    : '';
   return `
     <div class="q-card" data-qid="${q.id}">
       <div class="q-card-head">
         <div class="q-author-icon ${anonClass}">${escapeHtml(initial)}</div>
         <div class="q-author ${anonClass}">${escapeHtml(displayName)}</div>
+        ${badgesHtml}
         <div class="q-time">${formatRelativeTime(q.created_at)}</div>
       </div>
       <div class="q-content">${escapeHtml(q.content)}</div>
@@ -74,12 +115,24 @@ function renderQuestionCard(q){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
           <span id="reply-label-${q.id}">コメント</span>
         </button>
+        ${delBtnHtml}
       </div>
       <div class="q-replies" id="replies-${q.id}">
         <div class="empty-state" style="padding:14px 0;">読み込み中...</div>
       </div>
     </div>
   `;
+}
+
+// ---------- 質問の削除 ----------
+async function deleteQuestion(qid){
+  if(!confirm('この質問を削除します。コメントもすべて削除されます。よろしいですか？')) return;
+  // 先にコメントを削除（外部キー制約があっても問題ないようにするため）
+  const {error: repErr} = await _supabase.from('question_replies').delete().eq('question_id', qid);
+  if(repErr){ alert('削除に失敗しました: ' + repErr.message); return; }
+  const {error} = await _supabase.from('questions').delete().eq('id', qid);
+  if(error){ alert('削除に失敗しました: ' + error.message); return; }
+  await loadQuestions();
 }
 
 // ---------- コメント開閉 ----------
@@ -113,6 +166,7 @@ async function loadReplies(qid){
     return;
   }
   _repliesLoaded.add(qid);
+  await ensureBadges((data || []).map(r => r.user_id));
   renderReplyBox(qid, data || []);
 }
 
@@ -124,12 +178,18 @@ function renderReplyBox(qid, replies){
   const repliesHtml = replies.map(r => {
     const name = r.is_anonymous ? '匿名' : (r.author_name || '部員');
     const anonClass = r.is_anonymous ? 'anon' : '';
+    const badgesHtml = getBadgesHtml(r.user_id, r.is_anonymous);
+    const delBtnHtml = canDelete(r.user_id)
+      ? `<button class="q-reply-delete" onclick="deleteReply('${qid}','${r.id}')">削除</button>`
+      : '';
     return `
       <div class="q-reply-item">
         <div class="q-reply-body">
           <div class="q-reply-head">
             <div class="q-reply-author ${anonClass}">${escapeHtml(name)}</div>
+            ${badgesHtml}
             <div class="q-reply-time">${formatRelativeTime(r.created_at)}</div>
+            ${delBtnHtml}
           </div>
           <div class="q-reply-text">${escapeHtml(r.content)}</div>
         </div>
@@ -174,6 +234,16 @@ async function submitReply(qid){
     return;
   }
   input.value = '';
+  _repliesLoaded.delete(qid);
+  await loadReplies(qid);
+}
+
+// ---------- コメントの削除 ----------
+async function deleteReply(qid, replyId){
+  if(!confirm('このコメントを削除しますか？')) return;
+  const {error} = await _supabase.from('question_replies').delete().eq('id', replyId);
+  if(error){ alert('削除に失敗しました: ' + error.message); return; }
+  _repliesLoaded.delete(qid);
   await loadReplies(qid);
 }
 

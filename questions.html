@@ -143,6 +143,26 @@ textarea,input{font-family:inherit;}
   display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--text-dim);cursor:pointer;user-select:none;
 }
 
+.q-badges{display:inline-flex;gap:4px;flex-wrap:wrap;}
+.q-badge{
+  display:inline-flex;align-items:center;font-size:9px;font-weight:700;padding:2px 6px;
+  border-radius:999px;border:1px solid var(--border-light);color:var(--text-muted);white-space:nowrap;
+}
+.q-badge.b-teacher{border-color:rgba(232,160,32,.5);color:var(--orange-light);background:var(--orange-bg);}
+.q-badge.b-core{border-color:rgba(111,168,224,.4);color:#6FA8E0;background:rgba(111,168,224,.08);}
+.q-badge.b-certified{border-color:rgba(122,200,140,.4);color:#7AC88C;background:rgba(122,200,140,.08);}
+
+.q-delete-btn{
+  margin-left:auto;background:none;border:none;color:var(--text-dim);font-size:11px;font-weight:700;
+  cursor:pointer;padding:4px 2px;transition:color .15s;
+}
+.q-delete-btn:hover{color:var(--keep);}
+.q-reply-delete{
+  background:none;border:none;color:var(--text-dim);font-size:10px;font-weight:700;cursor:pointer;
+  margin-left:auto;flex-shrink:0;transition:color .15s;
+}
+.q-reply-delete:hover{color:var(--keep);}
+
 .empty-state{
   text-align:center;padding:50px 20px;color:var(--text-dim);font-size:12.5px;line-height:1.8;
 }
@@ -256,7 +276,7 @@ textarea,input{font-family:inherit;}
 <div class="main fade-up">
 
   <div class="q-intro">
-    ふとした疑問を気軽に投稿できる場所です。<strong>匿名・実名</strong>どちらでも投稿できます。コメントで返信し合いましょう。
+    ふとした疑問を気軽に投稿できる場所です。<strong>匿名・実名</strong>どちらでも投稿できます。コメントで返信し合いましょう。自分の投稿・コメントはいつでも削除できます。
   </div>
 
   <div class="q-list" id="q-list">

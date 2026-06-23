@@ -9,12 +9,14 @@ setTimeout(()=>{ document.getElementById('splash').classList.add('hide'); }, 550
 // このページに直接来た場合でもログイン状態を確認し、未ログインならホームへ戻す
 let CURRENT_UID = null;
 let CURRENT_USER_NAME = '';
+let CURRENT_IS_CORE = false;
 
 _supabase.auth.onAuthStateChange((event, session)=>{
   if(session && session.user){
     CURRENT_UID = session.user.id;
-    _supabase.from('profiles').select('name').eq('id', CURRENT_UID).single().then(({data})=>{
+    _supabase.from('profiles').select('name,is_core_member').eq('id', CURRENT_UID).single().then(({data})=>{
       CURRENT_USER_NAME = data?.name || session.user.email || '';
+      CURRENT_IS_CORE = !!data?.is_core_member;
     });
   } else {
     location.href = 'index.html';
@@ -28,6 +30,7 @@ let EVENTS = []; // 全イベント {id,title,event_date,event_time,location,des
 let selectedDateStr = null;
 let currentDetailId = null;
 let editingId = null;
+let _calBadgeMap = {}; // user_id -> {is_teacher, is_core_member, is_certified}
 
 const today = new Date();
 viewYear = today.getFullYear();
@@ -172,8 +175,169 @@ function openDetail(id){
     ${e.location ? `<div class="detail-meta-row"><span class="ic">📍</span> ${escapeHtml(e.location)}</div>` : ''}
     ${e.description ? `<div class="detail-desc">${escapeHtml(e.description)}</div>` : ''}
     ${e.created_by_name ? `<div class="detail-created">登録: ${escapeHtml(e.created_by_name)}</div>` : ''}
+    <div class="imp-section">
+      <div class="imp-label">感想</div>
+      <div class="imp-list" id="imp-list-${id}">
+        <div class="empty-state" style="padding:14px 0;">読み込み中...</div>
+      </div>
+      <div class="imp-form">
+        <div class="imp-input-row">
+          <textarea class="imp-input" id="imp-input-${id}" rows="1" placeholder="参加した感想を書いてみよう"></textarea>
+          <button class="imp-send" onclick="submitImpression('${id}')" aria-label="送信">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+          </button>
+        </div>
+        <label class="imp-anon-toggle">
+          <input type="checkbox" id="imp-anon-${id}" style="accent-color:var(--orange);">
+          匿名で投稿する
+        </label>
+      </div>
+    </div>
   `;
   document.getElementById('detail-overlay').classList.add('open');
+  loadImpressions(id);
+}
+
+// ---------- イベントの感想 ----------
+async function ensureBadgesCal(userIds){
+  const need = [...new Set(userIds)].filter(id => id && !(id in _calBadgeMap));
+  if(need.length === 0) return;
+  const {data, error} = await _supabase
+    .from('profiles')
+    .select('id,is_teacher,is_core_member,is_certified')
+    .in('id', need);
+  if(error){ console.error('バッジ取得エラー', error); return; }
+  (data || []).forEach(p => { _calBadgeMap[p.id] = p; });
+}
+
+function getImpBadgesHtml(userId, isAnonymous){
+  if(isAnonymous) return '';
+  const b = _calBadgeMap[userId];
+  if(!b) return '';
+  let html = '';
+  if(b.is_teacher)     html += `<span class="imp-badge b-teacher">先生</span>`;
+  if(b.is_core_member) html += `<span class="imp-badge b-core">コア</span>`;
+  if(b.is_certified)   html += `<span class="imp-badge b-certified">認定</span>`;
+  return html ? `<span class="imp-badges">${html}</span>` : '';
+}
+
+async function loadImpressions(eventId){
+  const listEl = document.getElementById('imp-list-'+eventId);
+  if(!listEl) return;
+  const {data, error} = await _supabase
+    .from('event_impressions')
+    .select('*')
+    .eq('event_id', eventId)
+    .order('created_at', {ascending:true});
+
+  if(error){
+    listEl.innerHTML = `<div class="empty-state" style="padding:10px 0;">感想の読み込みに失敗しました</div>`;
+    return;
+  }
+  await ensureBadgesCal((data || []).map(r => r.user_id));
+  renderImpressions(eventId, data || []);
+}
+
+function renderImpressions(eventId, impressions){
+  const listEl = document.getElementById('imp-list-'+eventId);
+  if(!listEl) return;
+  if(impressions.length === 0){
+    listEl.innerHTML = `<div style="font-size:11.5px;color:var(--text-dim);padding:2px 0 4px;">まだ感想はありません</div>`;
+    return;
+  }
+  listEl.innerHTML = impressions.map(imp => {
+    const name = imp.is_anonymous ? '匿名' : (imp.author_name || '部員');
+    const anonClass = imp.is_anonymous ? 'anon' : '';
+    const badgesHtml = getImpBadgesHtml(imp.user_id, imp.is_anonymous);
+    const isOwn = imp.user_id === CURRENT_UID;
+    const canDel = isOwn || CURRENT_IS_CORE;
+    const editBtnHtml = isOwn
+      ? `<button class="imp-delete" onclick="startEditImpression('${eventId}','${imp.id}')">編集</button>`
+      : '';
+    const delBtnHtml = canDel
+      ? `<button class="imp-delete" onclick="deleteImpression('${eventId}','${imp.id}')">削除</button>`
+      : '';
+    return `
+      <div class="imp-item" data-imp-id="${imp.id}">
+        <div class="imp-head">
+          <div class="imp-author ${anonClass}">${escapeHtml(name)}</div>
+          ${badgesHtml}
+          <div class="imp-time">${formatImpTime(imp.created_at)}</div>
+          ${editBtnHtml}
+          ${delBtnHtml}
+        </div>
+        <div class="imp-text" id="imp-text-${imp.id}">${escapeHtml(imp.content)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ---------- 感想の編集（自分の感想のみ） ----------
+function startEditImpression(eventId, impId){
+  const textEl = document.getElementById('imp-text-'+impId);
+  if(!textEl) return;
+  const currentContent = textEl.textContent;
+  textEl.innerHTML = `
+    <textarea class="imp-input" id="imp-edit-input-${impId}" rows="2" style="width:100%;margin-bottom:8px;">${escapeHtml(currentContent)}</textarea>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" style="padding:8px;font-size:12px;" onclick="saveEditImpression('${eventId}','${impId}')">保存する</button>
+      <button class="btn-ghost" style="padding:8px 12px;font-size:12px;" onclick="loadImpressions('${eventId}')">キャンセル</button>
+    </div>
+  `;
+}
+
+async function saveEditImpression(eventId, impId){
+  const input = document.getElementById('imp-edit-input-'+impId);
+  const content = input.value.trim();
+  if(!content) return;
+  const {error} = await _supabase.from('event_impressions').update({content}).eq('id', impId);
+  if(error){ alert('更新に失敗しました: ' + error.message); return; }
+  await loadImpressions(eventId);
+}
+
+async function submitImpression(eventId){
+  const input = document.getElementById('imp-input-'+eventId);
+  const anonCheckbox = document.getElementById('imp-anon-'+eventId);
+  const content = input.value.trim();
+  if(!content) return;
+
+  const isAnon = anonCheckbox.checked;
+  const {error} = await _supabase.from('event_impressions').insert({
+    event_id: eventId,
+    user_id: CURRENT_UID,
+    is_anonymous: isAnon,
+    author_name: isAnon ? null : CURRENT_USER_NAME,
+    content: content
+  });
+
+  if(error){
+    alert('感想の投稿に失敗しました: ' + error.message);
+    return;
+  }
+  input.value = '';
+  await loadImpressions(eventId);
+}
+
+async function deleteImpression(eventId, impId){
+  if(!confirm('この感想を削除しますか？')) return;
+  const {error} = await _supabase.from('event_impressions').delete().eq('id', impId);
+  if(error){ alert('削除に失敗しました: ' + error.message); return; }
+  await loadImpressions(eventId);
+}
+
+function formatImpTime(isoString){
+  if(!isoString) return '';
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+  if(diffMin < 1) return 'たった今';
+  if(diffMin < 60) return `${diffMin}分前`;
+  if(diffHour < 24) return `${diffHour}時間前`;
+  if(diffDay < 7) return `${diffDay}日前`;
+  return `${date.getMonth()+1}/${date.getDate()}`;
 }
 
 function closeModal(id){

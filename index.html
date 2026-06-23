@@ -276,16 +276,6 @@ button{font-family:inherit;}
 
 .subgroup{margin-left:14px;margin-top:8px;padding-left:14px;border-left:2px solid var(--border);display:flex;flex-direction:column;gap:8px;}
 
-.menu-card.add-card{
-  border-style:dashed;border-color:var(--border-light);background:transparent;
-}
-.menu-card.add-card:hover{background:var(--orange-bg);border-color:var(--orange);}
-.menu-card.add-card .menu-icon{
-  background:transparent;border:1px dashed var(--border-light);color:var(--text-muted);font-size:20px;font-weight:700;
-}
-.menu-card.add-card:hover .menu-icon{border-color:var(--orange);color:var(--orange);}
-.menu-card.add-card .menu-desc{color:var(--text-dim);}
-
 .footer-note{
   text-align:center;font-size:11px;color:var(--text-dim);margin-top:28px;line-height:1.8;
 }
@@ -487,17 +477,6 @@ button{font-family:inherit;}
   padding:18px 18px 20px;margin-bottom:10px;position:relative;
 }
 .portal-card.disabled{opacity:.6;}
-.portal-card.add-card{
-  border-style:dashed;border-color:var(--border-light);background:transparent;
-  cursor:pointer;transition:all .15s;
-}
-.portal-card.add-card:hover{background:var(--orange-bg);border-color:var(--orange);}
-.portal-card.add-card .portal-card-icon{
-  background:transparent;border:1px dashed var(--border-light);color:var(--text-muted);
-  font-size:18px;font-weight:700;
-}
-.portal-card.add-card:hover .portal-card-icon{border-color:var(--orange);color:var(--orange);}
-.portal-card.add-card .portal-card-desc{color:var(--text-dim);}
 .portal-card-del{
   position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:7px;
   background:var(--black);border:1px solid var(--border-light);color:var(--text-dim);
@@ -636,6 +615,8 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
         <input class="field" type="email" id="signup-email" placeholder="example@med.ac.jp" autocomplete="username">
         <div class="auth-field-label">パスワード（6文字以上）</div>
         <input class="field" type="password" id="signup-password" placeholder="パスワード" autocomplete="new-password">
+        <div class="auth-field-label">部活の合言葉 <span style="color:#F06060;">*</span></div>
+        <input class="field" type="text" id="signup-passphrase" placeholder="部員に確認してください" autocomplete="off">
         <div class="auth-field-label" style="display:flex;align-items:center;gap:6px;">
           招待コード
           <span style="font-size:10px;color:var(--text-dim);">確認者の方のみ入力</span>
@@ -793,50 +774,6 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
             </div>
           </div>
 
-          <div class="sec-label">救急医療<span class="badge-soon">今後追加予定</span></div>
-          <div class="menu-group" data-section="emergency">
-            <div class="menu-card add-card" onclick="openAddLinkModal('emergency')" role="button" tabindex="0">
-              <div class="menu-icon">＋</div>
-              <div class="menu-body">
-                <div class="menu-title">項目を追加する</div>
-                <div class="menu-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec-label">BLS<span class="badge-soon">今後追加予定</span></div>
-          <div class="menu-group" data-section="bls">
-            <div class="menu-card add-card" onclick="openAddLinkModal('bls')" role="button" tabindex="0">
-              <div class="menu-icon">＋</div>
-              <div class="menu-body">
-                <div class="menu-title">項目を追加する</div>
-                <div class="menu-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec-label">災害医療<span class="badge-soon">今後追加予定</span></div>
-          <div class="menu-group" data-section="disaster">
-            <div class="menu-card add-card" onclick="openAddLinkModal('disaster')" role="button" tabindex="0">
-              <div class="menu-icon">＋</div>
-              <div class="menu-body">
-                <div class="menu-title">項目を追加する</div>
-                <div class="menu-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="sec-label">地域医療<span class="badge-soon">今後追加予定</span></div>
-          <div class="menu-group" data-section="community">
-            <div class="menu-card add-card" onclick="openAddLinkModal('community')" role="button" tabindex="0">
-              <div class="menu-icon">＋</div>
-              <div class="menu-body">
-                <div class="menu-title">項目を追加する</div>
-                <div class="menu-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
-          </div>
-
           <div class="sec-label">その他</div>
           <div class="menu-group" data-section="other">
             <a class="menu-card" href="https://wj-medtech.github.io/fast_journey/" target="_blank" rel="noopener">
@@ -852,13 +789,6 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
               <div class="menu-body">
                 <div class="menu-title">解剖VR <span class="badge-soon">未定</span></div>
                 <div class="menu-desc">構想段階のコンテンツです</div>
-              </div>
-            </div>
-            <div class="menu-card add-card" onclick="openAddLinkModal('other')" role="button" tabindex="0">
-              <div class="menu-icon">＋</div>
-              <div class="menu-body">
-                <div class="menu-title">項目を追加する</div>
-                <div class="menu-desc">部員が自由にリンクを追加できます</div>
               </div>
             </div>
           </div>
@@ -1060,69 +990,9 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
             </div>
           </div>
 
-          <!-- 05 救急医療 -->
+          <!-- 05 その他コンテンツ -->
           <div class="back-section reveal">
-            <div class="back-eyebrow">05 · Emergency</div>
-            <div class="back-h2">救急医療 <span class="portal-card-tag muted">今後追加予定</span></div>
-            <div class="portal-card-list" data-section="emergency">
-              <div class="portal-card add-card" onclick="openAddLinkModal('emergency')" role="button" tabindex="0">
-                <div class="portal-card-head">
-                  <div class="portal-card-icon">＋</div>
-                  <div class="portal-card-title">項目を追加する</div>
-                </div>
-                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 06 BLS -->
-          <div class="back-section reveal">
-            <div class="back-eyebrow">06 · BLS</div>
-            <div class="back-h2">BLS <span class="portal-card-tag muted">今後追加予定</span></div>
-            <div class="portal-card-list" data-section="bls">
-              <div class="portal-card add-card" onclick="openAddLinkModal('bls')" role="button" tabindex="0">
-                <div class="portal-card-head">
-                  <div class="portal-card-icon">＋</div>
-                  <div class="portal-card-title">項目を追加する</div>
-                </div>
-                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 07 災害医療 -->
-          <div class="back-section reveal">
-            <div class="back-eyebrow">07 · Disaster Medicine</div>
-            <div class="back-h2">災害医療 <span class="portal-card-tag muted">今後追加予定</span></div>
-            <div class="portal-card-list" data-section="disaster">
-              <div class="portal-card add-card" onclick="openAddLinkModal('disaster')" role="button" tabindex="0">
-                <div class="portal-card-head">
-                  <div class="portal-card-icon">＋</div>
-                  <div class="portal-card-title">項目を追加する</div>
-                </div>
-                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 08 地域医療 -->
-          <div class="back-section reveal">
-            <div class="back-eyebrow">08 · Community Medicine</div>
-            <div class="back-h2">地域医療 <span class="portal-card-tag muted">今後追加予定</span></div>
-            <div class="portal-card-list" data-section="community">
-              <div class="portal-card add-card" onclick="openAddLinkModal('community')" role="button" tabindex="0">
-                <div class="portal-card-head">
-                  <div class="portal-card-icon">＋</div>
-                  <div class="portal-card-title">項目を追加する</div>
-                </div>
-                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 09 その他コンテンツ -->
-          <div class="back-section reveal">
-            <div class="back-eyebrow">09 · More</div>
+            <div class="back-eyebrow">05 · More</div>
             <div class="back-h2">その他</div>
 
             <div class="portal-card">
@@ -1144,15 +1014,6 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
               <div class="portal-card-desc">構想段階のコンテンツです。詳細は未定です。</div>
             </div>
 
-            <div class="portal-card-list" data-section="other">
-              <div class="portal-card add-card" onclick="openAddLinkModal('other')" role="button" tabindex="0">
-                <div class="portal-card-head">
-                  <div class="portal-card-icon">＋</div>
-                  <div class="portal-card-title">項目を追加する</div>
-                </div>
-                <div class="portal-card-desc">部員が自由にリンクを追加できます</div>
-              </div>
-            </div>
           </div>
 
           <div class="back-footer">
@@ -1341,35 +1202,8 @@ body.has-tabbar .back-main{padding-bottom:calc(58px + env(safe-area-inset-bottom
   </div>
 </div>
 
-<!-- 項目を追加するモーダル -->
-<div class="guide-overlay" id="addlink-overlay" onclick="closeAddLinkOnOverlay(event)">
-  <div class="guide-box" style="max-width:420px;">
-    <div class="guide-head">
-      <div class="guide-title">項目を追加する</div>
-      <button class="guide-close" onclick="closeAddLinkModal()" aria-label="閉じる">✕</button>
-    </div>
-    <div class="guide-sub" id="addlink-section-label" style="margin-bottom:18px;"></div>
-
-    <div class="auth-field-label" style="margin-top:0;">タイトル <span style="color:#F06060;">*</span></div>
-    <input class="field" type="text" id="addlink-title" placeholder="例：JATECコース申込ページ">
-
-    <div class="auth-field-label">リンク先URL <span style="color:#F06060;">*</span></div>
-    <input class="field" type="url" id="addlink-url" placeholder="https://...">
-
-    <div class="auth-field-label">アイコン（絵文字・省略可）</div>
-    <input class="field" type="text" id="addlink-icon" placeholder="🚑" maxlength="4">
-
-    <div class="auth-field-label">説明（省略可）</div>
-    <input class="field" type="text" id="addlink-desc" placeholder="ひとこと説明">
-
-    <div class="auth-error" id="addlink-error"></div>
-    <button class="auth-btn" id="addlink-submit-btn" onclick="submitAddLink()" style="margin-top:18px;">追加する</button>
-  </div>
-</div>
-
 <script src="app.js"></script>
 <script src="tabbar.js"></script>
-<script src="custom-links.js"></script>
 <script>
 // ===================== K-PICSの部員として：自主練注意事項モーダル =====================
 function openGuideModal(){

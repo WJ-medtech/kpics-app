@@ -209,6 +209,53 @@ button{font-family:inherit;}
 }
 .detail-created{font-size:10.5px;color:var(--text-dim);margin-top:14px;text-align:right;}
 
+/* ===================== イベントの感想 ===================== */
+.imp-section{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+.imp-label{
+  font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--orange);text-transform:uppercase;
+  margin-bottom:10px;
+}
+.imp-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.imp-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px;}
+.imp-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.imp-author{font-size:11px;font-weight:700;color:var(--text-muted);}
+.imp-author.anon{color:var(--text-dim);}
+.imp-time{font-size:9.5px;color:var(--text-dim);}
+.imp-text{font-size:12.5px;line-height:1.7;color:var(--text);white-space:pre-wrap;}
+.imp-delete{
+  background:none;border:none;color:var(--text-dim);font-size:10px;font-weight:700;cursor:pointer;
+  margin-left:auto;flex-shrink:0;transition:color .15s;
+}
+.imp-delete:hover{color:var(--keep);}
+
+.imp-badges{display:inline-flex;gap:4px;flex-wrap:wrap;}
+.imp-badge{
+  display:inline-flex;align-items:center;font-size:9px;font-weight:700;padding:2px 6px;
+  border-radius:999px;border:1px solid var(--border-light);color:var(--text-muted);white-space:nowrap;
+}
+.imp-badge.b-teacher{border-color:rgba(232,160,32,.5);color:var(--orange-light);background:var(--orange-bg);}
+.imp-badge.b-core{border-color:rgba(111,168,224,.4);color:#6FA8E0;background:rgba(111,168,224,.08);}
+.imp-badge.b-certified{border-color:rgba(122,200,140,.4);color:#7AC88C;background:rgba(122,200,140,.08);}
+
+.imp-form{display:flex;flex-direction:column;gap:8px;}
+.imp-input-row{display:flex;gap:8px;}
+.imp-input{
+  flex:1;background:var(--black);border:1px solid var(--border-light);border-radius:8px;
+  color:var(--text);padding:9px 12px;font-size:12.5px;outline:none;resize:none;
+  transition:border-color .15s;min-height:38px;font-family:"Noto Sans JP",sans-serif;
+}
+.imp-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(232,160,32,.12);}
+.imp-input::placeholder{color:var(--text-dim);}
+.imp-send{
+  flex-shrink:0;width:38px;height:38px;border-radius:8px;background:var(--orange);color:var(--black);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.imp-send:hover{background:var(--orange-light);}
+.imp-send:disabled{background:var(--border);color:var(--text-dim);cursor:not-allowed;}
+.imp-anon-toggle{
+  display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--text-dim);cursor:pointer;user-select:none;
+}
+
 /* ===================== 下部タブバー ===================== */
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;z-index:300;

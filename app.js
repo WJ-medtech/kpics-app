@@ -2,6 +2,7 @@
 // K-PICS ホームアプリ ロジック
 // ================================================================
 const REVIEWER_INVITE_CODE = 'KPICS-REVIEWER-2026';
+const MEMBER_PASSPHRASE = 'Learn-Lead-Serve';
 
 // ---------- スプラッシュ ----------
 const SPLASH_MIN_MS = 1200;
@@ -44,12 +45,14 @@ async function doSignup(){
   const year=parseInt(document.getElementById('signup-year').value);
   const email=document.getElementById('signup-email').value.trim();
   const password=document.getElementById('signup-password').value;
+  const passphrase=document.getElementById('signup-passphrase').value.trim();
   const invite=document.getElementById('signup-invite').value.trim();
   const errEl=document.getElementById('signup-error');
   const btn=document.getElementById('signup-btn');
   errEl.classList.remove('show');
-  if(!name||!email||!password){ errEl.textContent='名前・メールアドレス・パスワードは必須です'; errEl.classList.add('show'); return; }
+  if(!name||!email||!password||!passphrase){ errEl.textContent='名前・メールアドレス・パスワード・部活の合言葉は必須です'; errEl.classList.add('show'); return; }
   if(password.length<6){ errEl.textContent='パスワードは6文字以上にしてください'; errEl.classList.add('show'); return; }
+  if(passphrase!==MEMBER_PASSPHRASE){ errEl.textContent='部活の合言葉が正しくありません。部員に確認してください'; errEl.classList.add('show'); return; }
   if(invite&&invite!==REVIEWER_INVITE_CODE){ errEl.textContent='招待コードが正しくありません'; errEl.classList.add('show'); return; }
   const role=(invite===REVIEWER_INVITE_CODE)?'reviewer':'member';
   btn.disabled=true; btn.textContent='登録中...';
